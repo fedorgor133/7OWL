@@ -1,5 +1,7 @@
 package edu.ub.pis2425.a7owls.data.service;
 
+import java.util.regex.Pattern;
+
 import edu.ub.pis2425.a7owls.domain.User;
 import edu.ub.pis2425.a7owls.data.service.mockdata.MockClientsHashMap;
 
@@ -46,12 +48,16 @@ public class AuthService {
             String passwordConfirmation,
             OnSignUpListener listener
     ) {
+        String passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,20}$";
+
         if (username.isEmpty())
             listener.onSignUpError(new Throwable("Username cannot be empty"));
         else if (users.containsKey(username))
             listener.onSignUpError(new Throwable("Username already exists"));
         else if (password.isEmpty())
             listener.onSignUpError(new Throwable("Password cannot be empty"));
+        else if (!Pattern.matches(passwordPattern, password))
+            listener.onSignUpError(new Throwable("Password must be 8-20 characters long and contain at least 1 letter and 1 number"));
         else if (passwordConfirmation.isEmpty())
             listener.onSignUpError(new Throwable("Password confirmation cannot be empty"));
         else if (!password.equals(passwordConfirmation))

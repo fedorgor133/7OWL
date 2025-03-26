@@ -1,5 +1,6 @@
 package edu.ub.pis2425.a7owls.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -9,13 +10,10 @@ import edu.ub.pis2425.a7owls.databinding.ActivitySignupBinding;
 import edu.ub.pis2425.a7owls.data.service.AuthService;
 
 public class SignUpActivity extends AppCompatActivity {
-    /* Attributes */
     private AuthService authService;
-    /* View binding */
     private ActivitySignupBinding binding;
 
     /**
-     * Called when the activity is being created.
      * @param savedInstanceState
      */
     @Override
@@ -30,16 +28,16 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     /**
-     * Initialize the listeners of the widgets.
+     * Inicialitza listeners dels widgets
      */
     private void initWidgetListeners() {
         binding.btnSignUp.setOnClickListener(ignoredView -> {
-            /* Get the values of the widgets */
+            /* Obté valors dels widgets */
             String username = binding.usernameSignUp.getText().toString();
             String password = binding.passwordSignUp.getText().toString();
             String passwordConfirmation = binding.passwordSignUp2.getText().toString();
 
-            /* Define the listener for the sign up operation */
+            /* Defineix listener per l'operacio de sign up */
             AuthService.OnSignUpListener onSignUpListener = new AuthService.OnSignUpListener() {
                 @Override
                 public void onSignUpSuccess() {
@@ -56,13 +54,19 @@ public class SignUpActivity extends AppCompatActivity {
                 }
             };
 
-            /* Invoke the sign up operation */
+
             authService.signUp(
                     username,
                     password,
                     passwordConfirmation,
                     onSignUpListener
             );
+        });
+
+        binding.logInTxt.setOnClickListener(ignoredView -> {
+            Intent intent = new Intent(SignUpActivity.this, LogInActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }
