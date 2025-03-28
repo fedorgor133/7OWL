@@ -2,69 +2,58 @@ package edu.ub.pis2425.a7owls.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import edu.ub.pis2425.a7owls.databinding.ActivityLoginBinding;
-import edu.ub.pis2425.a7owls.domain.User;
-import edu.ub.pis2425.a7owls.data.service.AuthService;
 
 public class LogInActivity extends AppCompatActivity {
-    /* Attributes */
-    private AuthService authService;
-    /* View binding */
+    private FirebaseAuth mAuth;
     private ActivityLoginBinding binding;
 
-    /**
-     * Trucat quan l'activity es creada
-     * @param savedInstanceState
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /* Set view binding */
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        /* Inicialitzacions */
-        authService = new AuthService();
+        mAuth = FirebaseAuth.getInstance();
         initWidgetListeners();
     }
 
-    /**
-     * Inicialitza els listeners dels widgets
-     */
     private void initWidgetListeners() {
         binding.btnLogIn.setOnClickListener(ignoredView -> {
-            /* Obté el valor del widgets */
-            String username = binding.logInUsername.getText().toString();
+            String email = binding.logInUsername.getText().toString().trim();
             String password = binding.logInPassword.getText().toString();
 
-            /* Define the listener for the log-in operation */
-            AuthService.OnLogInListener listener;
-            listener = new AuthService.OnLogInListener() {
-                @Override
-                public void onLogInSuccess(User user) {
-                    Intent intent = new Intent(
-                            LogInActivity.this,
-                            LoggedInActivity.class
-                    );
-                    intent.putExtra("USER_ID", user.getId());
-                    startActivity(intent);
-                    finish();
-                }
-                @Override
-                public void onLogInError(Throwable throwable) {
-                    String errorMessage = throwable.getMessage();
-                    Toast.makeText(
-                            LogInActivity.this,
-                            errorMessage,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-            };
-            authService.logIn(username, password, listener);
+            if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            /*
+            Usamos la funcion de sign in de FirebaseAuth para loguearnos. Firebase
+            comprueba que el usuario ya exista y que la contraseña sea correcta.
+            Si la tasca es exitosa nos lleva a la pantalla principal.
+             */
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null) {
+                                Intent intent = new Intent(LogInActivity.this, LoggedInActivity.class);
+                                intent.putExtra("USER_ID", user.getUid()); // Pasamos el UID de Firebase
+                                startActivity(intent);
+                                finish();
+                            }
+                        } else {
+                            Toast.makeText(this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         binding.btnSignUp.setOnClickListener(ignoredView -> {
