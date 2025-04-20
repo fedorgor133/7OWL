@@ -97,7 +97,6 @@ public class QuizActivity extends AppCompatActivity {
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             showFinalScore();
-            // TODO: (user) points += score;
             if(score>0){
                 String uid = mAuth.getCurrentUser().getUid();
                 db.collection("usuarios").document(uid)
