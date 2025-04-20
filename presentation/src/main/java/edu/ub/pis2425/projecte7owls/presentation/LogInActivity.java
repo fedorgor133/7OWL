@@ -45,7 +45,7 @@ public class LogInActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
-                                Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+                                Intent intent = new Intent(LogInActivity.this, ContadorActivity.class);
                                 intent.putExtra("USER_ID", user.getUid()); // Pasamos el UID de Firebase
                                 startActivity(intent);
                                 finish();

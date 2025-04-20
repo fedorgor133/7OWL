@@ -29,6 +29,8 @@
         <activity android:name=".presentation.MainActivity" />
         <activity android:name=".presentation.SignUpActivity" />
         <activity android:name=".presentation.LoggedInActivity" />
+        <activity android:name=".presentation.ContadorActivity" />
+
     </application>
 
 
