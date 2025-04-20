@@ -21,6 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".presentation.QuizActivity" />
+        <activity android:name=".presentation.MainActivity" />
         <activity android:name=".presentation.SignUpActivity" />
         <activity android:name=".presentation.LoggedInActivity" />
     </application>

@@ -110,7 +110,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
 
         binding.logInTxt.setOnClickListener(ignoredView -> {
-            Intent intent = new Intent(SignUpActivity.this, LogInActivity.class);
+            Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });
