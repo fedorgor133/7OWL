@@ -2,23 +2,36 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Contenedor principal para fragments o contenido -->
-    <FrameLayout
-        android:id="@+id/main_content"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="20dp">
 
-    <!-- TextView para mostrar el contador de días -->
-    <TextView
-        android:id="@+id/diasTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cargando..."
-        android:textSize="20sp"
-        android:layout_gravity="center" />
+        <TextView
+            android:id="@+id/diasTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cargando..."
+            android:textColor="#4CAF50"
+            android:textSize="24sp"
+            android:layout_marginBottom="40dp" /> <!-- Espacio debajo del texto -->
+
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_red_dark"
+            android:text="Resetear contador"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
 
     <!-- Barra de navegación inferior -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -31,4 +44,5 @@
         app:itemTextColor="@color/white"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,8 +1,11 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,8 +13,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.Timestamp;
+
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -19,20 +22,47 @@ import edu.ub.pis2425.projecte7owls.R;
 public class ContadorActivity extends AppCompatActivity {
 
     private TextView diasTextView;
+    private Button resetButton;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+
+    // guardamos la fecha de registro una vez
+    private Timestamp fechaRegistro;
+
+    // handler y runnable para actualizar la UI periódicamente
+    private final Handler handler = new Handler();
+    private final Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (fechaRegistro != null) {
+                long diasSimulados = calcularDias(fechaRegistro, Timestamp.now());
+                diasTextView.setText("Llevas " + diasSimulados + " día(s) limpio.");
+            }
+            // repetir cada segundo
+            handler.postDelayed(this, 1000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contador);
         diasTextView = findViewById(R.id.diasTextView);
+        resetButton = findViewById(R.id.resetButton);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         setupBottomNavigation();
 
+        resetButton.setOnClickListener(v -> mostrarConfirmacionReset());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // arrancamos la actualización periódica
+        handler.post(updateRunnable);
 
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
@@ -40,28 +70,61 @@ public class ContadorActivity extends AppCompatActivity {
         }
     }
 
-    private void obtenerFechaRegistro(String userId) {
-        db.collection("usuarios").document(userId).get().addOnSuccessListener(document -> {
-            if (document.exists() && document.contains("fechaRegistro")) {
-                Timestamp fechaRegistro = document.getTimestamp("fechaRegistro");
-                if (fechaRegistro != null) {
-                    long diasUsados = calcularDias(fechaRegistro, Timestamp.now());
-                    diasTextView.setText("Llevas " + diasUsados + " día(s) usando la app.");
-                }
-            } else {
-                diasTextView.setText("No se encontró la fecha de registro.");
-            }
-        }).addOnFailureListener(e -> Log.e("Firestore", "Error al obtener datos del usuario", e));
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // detenemos actualizaciones al salir
+        handler.removeCallbacks(updateRunnable);
     }
 
+    private void mostrarConfirmacionReset() {
+        new AlertDialog.Builder(this)
+                .setTitle("Resetear Contador")
+                .setMessage("¿Estás seguro de que quieres resetear el contador? Cada día es un reto nuevo, ¡no te rindas!")
+                .setPositiveButton("Sí", (dialog, which) -> resetearContador())
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void resetearContador() {
+        if (auth.getCurrentUser() == null) return;
+        String userId = auth.getCurrentUser().getUid();
+
+        db.collection("usuarios").document(userId)
+                .update("fechaRegistro", FieldValue.serverTimestamp())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Fecha de inicio reiniciada correctamente.");
+                    obtenerFechaRegistro(userId);
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al resetear contador", e));
+    }
+
+    private void obtenerFechaRegistro(String userId) {
+        db.collection("usuarios").document(userId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists() && document.contains("fechaRegistro")) {
+                        Timestamp ts = document.getTimestamp("fechaRegistro");
+                        if (ts != null) {
+                            // guardamos la fecha inicial y dejamos que el runnable actualice la UI
+                            fechaRegistro = ts;
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener datos del usuario", e));
+    }
+
+    // Cada 10 segundos reales = 1 día simulado.
+
     private long calcularDias(Timestamp inicio, Timestamp fin) {
-        long diffInMillis = fin.toDate().getTime() - inicio.toDate().getTime();
-        return TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        long diffMillis = fin.toDate().getTime() - inicio.toDate().getTime();
+        long segundosReales = TimeUnit.MILLISECONDS.toSeconds(diffMillis);
+        return segundosReales / 10;
     }
 
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_quiz);
+        bottomNavigationView.setSelectedItemId(R.id.nav_contador);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -80,5 +143,4 @@ public class ContadorActivity extends AppCompatActivity {
             return false;
         });
     }
-
 }
