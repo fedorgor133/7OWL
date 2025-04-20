@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_contador"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Contador" />
+    <item
+        android:id="@+id/nav_quiz"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Quizzes" />
+    <item
+        android:id="@+id/nav_shop"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Shop" />
+    <item
+        android:id="@+id/nav_ruleta"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="Ruleta" />
+</menu>
