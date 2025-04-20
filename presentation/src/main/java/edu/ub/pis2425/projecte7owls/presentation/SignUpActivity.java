@@ -67,6 +67,7 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+
     private void guardarUsuarioEnFirestore(String uid, String email) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
