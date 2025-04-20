@@ -97,6 +97,23 @@ public class QuizActivity extends AppCompatActivity {
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             showFinalScore();
+            // TODO: (user) points += score;
+            if(score>0){
+                String uid = mAuth.getCurrentUser().getUid();
+                db.collection("usuarios").document(uid)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                Long points = documentSnapshot.getLong("points");
+                                if (points == null) points = 0L;
+                                long newPoints = points + score;
+                                db.collection("usuarios").document(uid)
+                                        .update("points", newPoints);
+                            }
+                        })
+                        .addOnFailureListener(e ->
+                                Toast.makeText(this, "Error retrieving user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
             return;
         }
 
@@ -141,6 +158,8 @@ public class QuizActivity extends AppCompatActivity {
 
             if (isCorrect) {
                 score += 10;
+                // TODO: contestadaCorrecta = true
+
                 Toast.makeText(this, "+10 points! Correct", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();

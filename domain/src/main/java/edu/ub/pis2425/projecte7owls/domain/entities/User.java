@@ -5,6 +5,7 @@ public class User {
     private String id;
     private String username;
     private String password;
+    private int points;
 
     /**
      * Constructor.
@@ -15,6 +16,7 @@ public class User {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.points = 0;
     }
 
     /**
@@ -44,7 +46,13 @@ public class User {
         return password;
     }
 
-    /**
-     * Obté photoUrl del user
+    /*
+     * Obté punts del user
      */
+    public int getPoints() {
+        return points;
+    }
+    public void setPoints(int score) {
+        this.points = score;
+    }
 }
