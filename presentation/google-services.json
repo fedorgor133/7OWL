@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "993762949533",
+    "project_id": "login-register-firebase-fe35c",
+    "storage_bucket": "login-register-firebase-fe35c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993762949533:android:82f3f331b2ecd6e91bd774",
+        "android_client_info": {
+          "package_name": "edu.ub.pis2425.a7owls"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcs1MMN-O_M0grCI7aylVFbjij7-1zP5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993762949533:android:48ed11f186babb4e1bd774",
+        "android_client_info": {
+          "package_name": "edu.ub.pis2425.projecte7owls"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcs1MMN-O_M0grCI7aylVFbjij7-1zP5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

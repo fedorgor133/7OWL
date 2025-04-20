@@ -3,12 +3,14 @@ package edu.ub.pis2425.projecte7owls.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -65,6 +67,21 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    private void guardarUsuarioEnFirestore(String uid, String email) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("email", email);
+        userInfo.put("uid", uid);
+        userInfo.put("fechaRegistro", FieldValue.serverTimestamp());
+
+        db.collection("usuarios").document(uid).set(userInfo)
+                .addOnSuccessListener(unused ->
+                        Log.d("Firestore", "Usuario guardado en Firestore correctamente"))
+                .addOnFailureListener(e ->
+                        Log.e("Firestore", "Error al guardar usuario: " + e.getMessage()));
+    }
+
 
     private void initWidgetListeners() {
         binding.btnSignUp.setOnClickListener(ignoredView -> {
@@ -100,6 +117,7 @@ public class SignUpActivity extends AppCompatActivity {
                             des de Firestore amb el seu UID personalitzat.
                              */
                             copiarPreguntasBaseParaUsuario(uid);
+                            guardarUsuarioEnFirestore(uid, email);
 
                             Toast.makeText(this, "Sign up successful!", Toast.LENGTH_SHORT).show();
                             finish();
