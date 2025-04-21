@@ -14,11 +14,13 @@ import com.google.firebase.auth.FirebaseUser;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.databinding.ActivityLoginBinding;
+import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
 
 public class ShopActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_shop);
         super.onCreate(savedInstanceState);
         setupBottomNavigation();
     }
