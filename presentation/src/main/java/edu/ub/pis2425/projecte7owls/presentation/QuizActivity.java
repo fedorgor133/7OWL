@@ -97,6 +97,7 @@ public class QuizActivity extends AppCompatActivity {
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             showFinalScore();
+            updatePoints();
             return;
         }
 
@@ -146,9 +147,15 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();
             }
 
-            db.collection("preguntas")
+            db.collection("preguntas_usuari")
                     .document(currentDoc.getId())
-                    .update(updateData);
+                    .update(updateData)
+                    .addOnSuccessListener(aVoid -> {
+                        // Puedes hacer un log o mensaje si quieres
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error al actualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
 
             currentQuestionIndex++;
             showQuestion();
@@ -170,6 +177,25 @@ public class QuizActivity extends AppCompatActivity {
                 );
 
         finish();
+    }
+
+    private void updatePoints(){
+        if(score>0){
+            String uid = mAuth.getCurrentUser().getUid();
+            db.collection("usuarios").document(uid)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            Long points = documentSnapshot.getLong("points");
+                            if (points == null) points = 0L;
+                            long newPoints = points + score;
+                            db.collection("usuarios").document(uid)
+                                    .update("points", newPoints);
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Error retrieving user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }
     }
 
     private void resetInactivityTimer() {
