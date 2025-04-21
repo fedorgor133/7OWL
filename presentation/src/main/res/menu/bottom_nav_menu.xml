@@ -3,11 +3,11 @@
     <item
         android:id="@+id/nav_contador"
         android:icon="@android:drawable/ic_menu_agenda"
-        android:title="Contador" />
+        android:title="Counter" />
     <item
         android:id="@+id/nav_quiz"
         android:icon="@android:drawable/ic_menu_info_details"
-        android:title="Quizzes" />
+        android:title="Quiz" />
     <item
         android:id="@+id/nav_shop"
         android:icon="@android:drawable/ic_menu_view"
@@ -15,5 +15,5 @@
     <item
         android:id="@+id/nav_ruleta"
         android:icon="@android:drawable/ic_menu_rotate"
-        android:title="Ruleta" />
+        android:title="Roulette" />
 </menu>

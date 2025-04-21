@@ -4,36 +4,56 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="20dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        tools:context=".presentation.ContadorActivity">
 
+        <!-- Title -->
         <TextView
             android:id="@+id/diasTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cargando..."
-            android:textColor="#4CAF50"
-            android:textSize="24sp"
-            android:layout_marginBottom="40dp" /> <!-- Espacio debajo del texto -->
+            android:text="Loading..."
+            android:textColor="@color/teal_700"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="300px"/>
 
-        <Button
+        <!-- Reset Button -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/resetButton"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/holo_red_dark"
-            android:text="Resetear contador"
-            android:textColor="@android:color/white" />
+            android:text="Reset Counter"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/red"
+            android:elevation="4dp"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:lineSpacingExtra="6dp"
+            android:text="In this section you can see how many days you have been free from gambling. As the days go by, you will feel that you no longer need to gamble. Do NOT give up!"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
-
-    <!-- Barra de navegación inferior -->
+    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -46,3 +66,4 @@
         app:menu="@menu/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

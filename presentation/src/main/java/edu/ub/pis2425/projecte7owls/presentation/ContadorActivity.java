@@ -36,7 +36,7 @@ public class ContadorActivity extends AppCompatActivity {
         public void run() {
             if (fechaRegistro != null) {
                 long diasSimulados = calcularDias(fechaRegistro, Timestamp.now());
-                diasTextView.setText("Llevas " + diasSimulados + " día(s) limpio.");
+                diasTextView.setText("You have been clean " + diasSimulados + " day(s).");
             }
             // repetir cada segundo
             handler.postDelayed(this, 1000);
@@ -79,9 +79,9 @@ public class ContadorActivity extends AppCompatActivity {
 
     private void mostrarConfirmacionReset() {
         new AlertDialog.Builder(this)
-                .setTitle("Resetear Contador")
-                .setMessage("¿Estás seguro de que quieres resetear el contador? Cada día es un reto nuevo, ¡no te rindas!")
-                .setPositiveButton("Sí", (dialog, which) -> resetearContador())
+                .setTitle("Reset Counter")
+                .setMessage("Are you sure you want to reset the counter? Every day is a new challenge, don't give up!")
+                .setPositiveButton("Yes", (dialog, which) -> resetearContador())
                 .setNegativeButton("No", null)
                 .show();
     }
