@@ -18,6 +18,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Mostrar puntos actuales -->
+            <TextView
+                android:id="@+id/pointsTextViewQuiz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:text="Points: 0"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/txtPregunta"
                 android:layout_width="wrap_content"

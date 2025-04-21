@@ -3,7 +3,9 @@ package edu.ub.pis2425.projecte7owls.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,17 +29,23 @@ public class QuizActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private List<DocumentSnapshot> questions = new ArrayList<>();
+    private TextView pointsTextViewQuiz;
     private int currentQuestionIndex = 0;
     private int score = 0;
     private final int totalQuestions = 10;
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
+    private String uid;
+
+    private int currentPoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        pointsTextViewQuiz = findViewById(R.id.pointsTextViewQuiz);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -47,6 +55,7 @@ public class QuizActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         loadQuestions();
+        loadUserPoints();
         setupOptionListeners();
     }
 
@@ -72,8 +81,24 @@ public class QuizActivity extends AppCompatActivity {
         });
     }
 
+    private void loadUserPoints() {
+        if (mAuth.getCurrentUser() != null) {
+            db.collection("usuarios").document(uid).get().addOnSuccessListener(document -> {
+                if (document.exists() && document.contains("points")) {
+                    Long pointsValue = document.getLong("points");
+                    currentPoints = pointsValue != null ? pointsValue.intValue() : 0;
+                } else {
+                    currentPoints = 0;
+                }
+                pointsTextViewQuiz.setText("Points: " + currentPoints);
+            }).addOnFailureListener(e -> {
+                Log.e("Firestore", "Error loading points", e);
+            });
+        }
+    }
+
     private void loadQuestions() {
-        String uid = mAuth.getCurrentUser().getUid();
+        uid = mAuth.getCurrentUser().getUid();
 
         db.collection("preguntas_usuari")
                 .whereEqualTo("userId", uid)
@@ -163,7 +188,6 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void showFinalScore() {
-        String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> result = new HashMap<>();
         result.put("userId", uid);
@@ -181,7 +205,6 @@ public class QuizActivity extends AppCompatActivity {
 
     private void updatePoints(){
         if(score>0){
-            String uid = mAuth.getCurrentUser().getUid();
             db.collection("usuarios").document(uid)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
