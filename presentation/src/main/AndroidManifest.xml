@@ -30,6 +30,8 @@
         <activity android:name=".presentation.SignUpActivity" />
         <activity android:name=".presentation.LoggedInActivity" />
         <activity android:name=".presentation.ContadorActivity" />
+        <activity android:name=".presentation.RouletteActivity" />
+
 
     </application>
 

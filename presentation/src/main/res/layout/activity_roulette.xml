@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Contenedor principal -->
+    <FrameLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Mostrar puntos actuales -->
+                <TextView
+                    android:id="@+id/pointsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Points: 0"
+                    android:textSize="18sp"/>
+
+                <!-- Apuesta al número -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Apuesta por un número (0-36):"
+                    android:layout_marginTop="16dp"/>
+
+                <Spinner
+                    android:id="@+id/numberSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/numberBetEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Cantidad de puntos"
+                    android:inputType="number"/>
+
+                <!-- Apuesta al color -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Apuesta por un color:"
+                    android:layout_marginTop="16dp"/>
+
+                <RadioGroup
+                    android:id="@+id/colorRadioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/redRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rojo"/>
+                    <RadioButton
+                        android:id="@+id/blackRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Negro"/>
+                </RadioGroup>
+
+                <EditText
+                    android:id="@+id/colorBetEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Cantidad de puntos"
+                    android:inputType="number"/>
+
+                <!-- Apuesta por paridad -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Apuesta por paridad:"
+                    android:layout_marginTop="16dp"/>
+
+                <RadioGroup
+                    android:id="@+id/parityRadioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/evenRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Par"/>
+                    <RadioButton
+                        android:id="@+id/oddRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Impar"/>
+                </RadioGroup>
+
+                <EditText
+                    android:id="@+id/parityBetEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Cantidad de puntos"
+                    android:inputType="number"/>
+
+                <!-- GIF de la ruleta (asegúrate de tener el gif en drawable, por ejemplo, roulette_spin.gif) -->
+                <ImageView
+                    android:id="@+id/rouletteGifImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="16dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/roulette"/>
+
+                <!-- Botón para girar la ruleta -->
+                <Button
+                    android:id="@+id/spinButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Girar Ruleta"
+                    android:layout_marginTop="16dp"/>
+
+                <!-- Resultado de la apuesta -->
+                <TextView
+                    android:id="@+id/resultTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resultado:"
+                    android:textSize="18sp"
+                    android:layout_marginTop="16dp"/>
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+    <!-- Barra de navegación inferior -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/blue_dark"
+        app:itemIconTint="@color/white"
+        app:itemTextColor="@color/white"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
