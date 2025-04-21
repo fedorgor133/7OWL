@@ -56,7 +56,6 @@ public class RouletteActivity extends AppCompatActivity {
 
         // Inicializa los widgets
         pointsTextView = findViewById(R.id.pointsTextView);
-        resultTextView = findViewById(R.id.resultTextView);
         numberSpinner = findViewById(R.id.numberSpinner);
         numberBetEditText = findViewById(R.id.numberBetEditText);
         colorRadioGroup = findViewById(R.id.colorRadioGroup);
@@ -140,16 +139,15 @@ public class RouletteActivity extends AppCompatActivity {
 
         int totalBet = betNumber + betColor + betParity;
         if (totalBet == 0) {
-            Toast.makeText(this, "Por favor, ingresa una apuesta.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please place a bet.", Toast.LENGTH_SHORT).show();
             return;
         }
         if (totalBet > currentPoints) {
-            Toast.makeText(this, "No tienes suficientes puntos para apostar esa cantidad.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You do not have enough points to bet that amount.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         spinButton.setEnabled(false);
-        resultTextView.setText("Girando la ruleta...");
 
         // Cargar el GIF de la ruleta usando Glide.
         Glide.with(this)
@@ -180,11 +178,11 @@ public class RouletteActivity extends AppCompatActivity {
 
         // Para el 0, solo se mostrará el número (se ignoran color y paridad)
         String outcomeColor = outcome == 0 ? "" : getRouletteColor(outcome);
-        String outcomeParity = (outcome == 0) ? "" : (outcome % 2 == 0 ? "Par" : "Impar");
+        String outcomeParity = (outcome == 0) ? "" : (outcome % 2 == 0 ? "Even" : "Odd");
 
         int winnings = 0;
         StringBuilder resultMessage = new StringBuilder();
-        resultMessage.append("Resultado: ").append(outcome);
+        resultMessage.append("Result: ").append(outcome);
         if (outcome != 0) {
             resultMessage.append(" (").append(outcomeColor).append(", ").append(outcomeParity).append(")");
         }
@@ -195,9 +193,9 @@ public class RouletteActivity extends AppCompatActivity {
             if (chosenNumber == outcome) {
                 int winAmount = betNumber * 35;
                 winnings += winAmount;
-                resultMessage.append("Apuesta número: Ganaste ").append(winAmount).append(" puntos.\n");
+                resultMessage.append("Number bet: You have won ").append(winAmount).append(" points.\n");
             } else {
-                resultMessage.append("Apuesta número: Perdiste ").append(betNumber).append(" puntos.\n");
+                resultMessage.append("Number bet: You have lost ").append(betNumber).append(" points.\n");
             }
         }
 
@@ -208,9 +206,9 @@ public class RouletteActivity extends AppCompatActivity {
             if (outcome != 0 && chosenColor.equalsIgnoreCase(outcomeColor)) {
                 int winAmount = betColor * 2;  // Se duplican los puntos apostados (pago 2:1)
                 winnings += winAmount;
-                resultMessage.append("Apuesta color: Ganaste ").append(winAmount).append(" puntos.\n");
+                resultMessage.append("Color bet: You have wone ").append(winAmount).append(" points.\n");
             } else {
-                resultMessage.append("Apuesta color: Perdiste ").append(betColor).append(" puntos.\n");
+                resultMessage.append("Color bet: You have lost ").append(betColor).append(" points.\n");
             }
         }
 
@@ -221,9 +219,9 @@ public class RouletteActivity extends AppCompatActivity {
             if (outcome != 0 && chosenParity.equalsIgnoreCase(outcomeParity)) {
                 int winAmount = betParity * 2;  // Se duplican los puntos apostados (pago 2:1)
                 winnings += winAmount;
-                resultMessage.append("Apuesta paridad: Ganaste ").append(winAmount).append(" puntos.\n");
+                resultMessage.append("Parity bet: You have won  ").append(winAmount).append(" points.\n");
             } else {
-                resultMessage.append("Apuesta paridad: Perdiste ").append(betParity).append(" puntos.\n");
+                resultMessage.append("Parity bet: You have lost ").append(betParity).append(" points.\n");
             }
         }
 
@@ -232,8 +230,8 @@ public class RouletteActivity extends AppCompatActivity {
         int netChange = winnings - totalBet;
         currentPoints += netChange;
 
-        resultMessage.append("\nPuntos netos ganados: ").append(netChange).append(" puntos.\n");
-        resultMessage.append("Tus puntos actuales: ").append(currentPoints).append(" puntos.");
+        resultMessage.append("\nTotal points earned: ").append(netChange).append(" points.\n");
+        resultMessage.append("Your current points: ").append(currentPoints).append(" points.");
 
         // Actualiza Firestore con los nuevos puntos.
         db.collection("usuarios").document(userId)
@@ -243,14 +241,13 @@ public class RouletteActivity extends AppCompatActivity {
 
         // Muestra un AlertDialog con el resultado.
         new AlertDialog.Builder(RouletteActivity.this)
-                .setTitle("Resultado de la Ruleta")
+                .setTitle("Roulette Results")
                 .setMessage(resultMessage.toString())
                 .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                 .show();
 
         // Actualiza la vista de puntos y resetea el botón de giro.
         pointsTextView.setText("Points: " + currentPoints);
-        resultTextView.setText("Resultado mostrado arriba.");
         spinButton.setEnabled(true);
     }
 
@@ -258,9 +255,9 @@ public class RouletteActivity extends AppCompatActivity {
     private String getRouletteColor(int number) {
         Set<Integer> reds = new HashSet<>(Arrays.asList(1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36));
         if (number == 0) {
-            return "Verde";
+            return "Green";
         }
-        return reds.contains(number) ? "Rojo" : "Negro";
+        return reds.contains(number) ? "Red" : "Black";
     }
 
     private void setupBottomNavigation() {
