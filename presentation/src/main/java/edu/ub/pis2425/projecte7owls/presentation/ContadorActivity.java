@@ -15,6 +15,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.Timestamp;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -22,14 +24,18 @@ import edu.ub.pis2425.projecte7owls.R;
 public class ContadorActivity extends AppCompatActivity {
 
     private TextView diasTextView;
+    private TextView adviceTextView;  // Nuevo TextView para los mensajes de consejo
     private Button resetButton;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
-    // guardamos la fecha de registro una vez
+    // Guardamos la fecha de registro una vez obtenida
     private Timestamp fechaRegistro;
 
-    // handler y runnable para actualizar la UI periódicamente
+    // Lista para almacenar los consejos cargados desde Firestore.
+    private final List<AdviceMessage> adviceList = new ArrayList<>();
+
+    // Handler y Runnable para actualizar la UI periódicamente
     private final Handler handler = new Handler();
     private final Runnable updateRunnable = new Runnable() {
         @Override
@@ -37,31 +43,54 @@ public class ContadorActivity extends AppCompatActivity {
             if (fechaRegistro != null) {
                 long diasSimulados = calcularDias(fechaRegistro, Timestamp.now());
                 diasTextView.setText("You have been clean " + diasSimulados + " day(s).");
+                String advice = getAdviceForDays(diasSimulados);
+                if (advice != null) {
+                    adviceTextView.setText(advice);
+                } else {
+                    adviceTextView.setText("Keep going! New challenges await you.");
+                }
             }
-            // repetir cada segundo
+            // Repetir cada segundo
             handler.postDelayed(this, 1000);
         }
     };
+
+    // Clase para representar un consejo
+    public static class AdviceMessage {
+        public int minDays;
+        public int maxDays;
+        public String message;
+
+        public AdviceMessage() { } // Constructor vacío para Firebase
+
+        public AdviceMessage(int minDays, int maxDays, String message) {
+            this.minDays = minDays;
+            this.maxDays = maxDays;
+            this.message = message;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contador);
         diasTextView = findViewById(R.id.diasTextView);
+        adviceTextView = findViewById(R.id.adviceTextView);
         resetButton = findViewById(R.id.resetButton);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         setupBottomNavigation();
-
         resetButton.setOnClickListener(v -> mostrarConfirmacionReset());
+
+        loadAdviceMessages();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // arrancamos la actualización periódica
+        // Arranca la actualización periódica
         handler.post(updateRunnable);
 
         if (auth.getCurrentUser() != null) {
@@ -73,7 +102,7 @@ public class ContadorActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // detenemos actualizaciones al salir
+        // Detener actualizaciones al salir
         handler.removeCallbacks(updateRunnable);
     }
 
@@ -106,7 +135,7 @@ public class ContadorActivity extends AppCompatActivity {
                     if (document.exists() && document.contains("fechaRegistro")) {
                         Timestamp ts = document.getTimestamp("fechaRegistro");
                         if (ts != null) {
-                            // guardamos la fecha inicial y dejamos que el runnable actualice la UI
+                            // Guardamos la fecha inicial para que el Runnable actualice la UI.
                             fechaRegistro = ts;
                         }
                     }
@@ -114,12 +143,35 @@ public class ContadorActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener datos del usuario", e));
     }
 
-    // Cada 10 segundos reales = 1 día simulado.
-
+    // Simulación: Cada 10 segundos reales equivalen a 1 día simulado.
     private long calcularDias(Timestamp inicio, Timestamp fin) {
         long diffMillis = fin.toDate().getTime() - inicio.toDate().getTime();
         long segundosReales = TimeUnit.MILLISECONDS.toSeconds(diffMillis);
         return segundosReales / 10;
+    }
+
+    // Carga todos los consejos de la colección "advice" en Firestore.
+    private void loadAdviceMessages() {
+        db.collection("advice")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    adviceList.clear();
+                    queryDocumentSnapshots.getDocuments().forEach(document -> {
+                        AdviceMessage advice = document.toObject(AdviceMessage.class);
+                        adviceList.add(advice);
+                    });
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error loading advice messages", e));
+    }
+
+    // Devuelve el mensaje adecuado según los días simulados.
+    private String getAdviceForDays(long days) {
+        for (AdviceMessage advice : adviceList) {
+            if (days >= advice.minDays && days <= advice.maxDays) {
+                return advice.message;
+            }
+        }
+        return null;
     }
 
     private void setupBottomNavigation() {
