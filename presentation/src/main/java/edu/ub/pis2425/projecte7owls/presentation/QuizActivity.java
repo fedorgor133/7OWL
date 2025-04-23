@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class QuizActivity extends AppCompatActivity {
     private ActivityQuizBinding binding;
@@ -36,6 +38,7 @@ public class QuizActivity extends AppCompatActivity {
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
     private String uid;
+    private UserViewModel userViewModel;
 
     private int currentPoints;
 
@@ -45,6 +48,7 @@ public class QuizActivity extends AppCompatActivity {
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         pointsTextViewQuiz = findViewById(R.id.pointsTextViewQuiz);
 
         db = FirebaseFirestore.getInstance();
@@ -53,6 +57,8 @@ public class QuizActivity extends AppCompatActivity {
         inactivityHandler = new Handler();
         inactivityRunnable = this::endQuizDueToInactivity;
 
+        uid = mAuth.getCurrentUser().getUid();
+        observeUserScore();
         setupBottomNavigation();
         loadQuestions();
         loadUserPoints();
@@ -122,7 +128,6 @@ public class QuizActivity extends AppCompatActivity {
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             showFinalScore();
-            updatePoints();
             return;
         }
 
@@ -167,6 +172,7 @@ public class QuizActivity extends AppCompatActivity {
 
             if (isCorrect) {
                 score += 10;
+                userViewModel.updateUserScore(uid, currentPoints + score);
                 Toast.makeText(this, "+10 points! Correct", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();
@@ -203,23 +209,12 @@ public class QuizActivity extends AppCompatActivity {
         finish();
     }
 
-    private void updatePoints(){
-        if(score>0){
-            db.collection("usuarios").document(uid)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            Long points = documentSnapshot.getLong("points");
-                            if (points == null) points = 0L;
-                            long newPoints = points + score;
-                            db.collection("usuarios").document(uid)
-                                    .update("points", newPoints);
-                        }
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, "Error retrieving user data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        }
+    private void observeUserScore() {
+        userViewModel.observeUserScore(uid).observe(this, score -> {
+            pointsTextViewQuiz.setText("Points: " + score);
+        });
     }
+
 
     private void resetInactivityTimer() {
         inactivityHandler.removeCallbacks(inactivityRunnable);
