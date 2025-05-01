@@ -1,34 +1,29 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import edu.ub.pis2425.projecte7owls.R;
-import edu.ub.pis2425.projecte7owls.databinding.ActivityLoginBinding;
-import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
 
 public class ShopActivity extends AppCompatActivity {
 
+    private int cartTotal = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_shop);
         super.onCreate(savedInstanceState);
-        setupBottomNavigation();
-    }
+        setContentView(R.layout.activity_shop);
 
+        setupBottomNavigation();
+        loadShoppingFragment();
+    }
 
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_contador);
+        bottomNavigationView.setSelectedItemId(R.id.nav_shop); // Marca "Shop" como seleccionado
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -39,12 +34,19 @@ public class ShopActivity extends AppCompatActivity {
                 startActivity(new Intent(this, QuizActivity.class));
                 return true;
             } else if (id == R.id.nav_shop) {
-                return true;
+                return true; // Ya estamos en Shop
             } else if (id == R.id.nav_ruleta) {
                 startActivity(new Intent(this, RouletteActivity.class));
                 return true;
             }
             return false;
         });
+    }
+
+    private void loadShoppingFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_content, new ShoppingFragment()) // Aquí cargas tu ShoppingFragment
+                .commit();
     }
 }
