@@ -82,6 +82,9 @@ public class QuizActivity extends AppCompatActivity {
             } else if (id == R.id.nav_ruleta) {
                 startActivity(new Intent(this, RouletteActivity.class));
                 return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
             }
             return false;
         });

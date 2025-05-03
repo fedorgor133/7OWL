@@ -277,6 +277,9 @@ public class RouletteActivity extends AppCompatActivity {
             } else if (id == R.id.nav_shop) {
                 startActivity(new Intent(this, ShopActivity.class));
                 return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
             }
             return false;
         });

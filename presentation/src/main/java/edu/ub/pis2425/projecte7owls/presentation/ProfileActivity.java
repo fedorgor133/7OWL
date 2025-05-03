@@ -1,31 +1,24 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import edu.ub.pis2425.projecte7owls.R;
-import edu.ub.pis2425.projecte7owls.databinding.ActivityLoginBinding;
-import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
+import edu.ub.pis2425.projecte7owls.databinding.ActivityProfileBinding;
 
-public class ShopActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity {
+    private ActivityProfileBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_shop);
         super.onCreate(savedInstanceState);
-        setupBottomNavigation();
+        binding = ActivityProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
     }
-
-
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_contador);
@@ -39,12 +32,12 @@ public class ShopActivity extends AppCompatActivity {
                 startActivity(new Intent(this, QuizActivity.class));
                 return true;
             } else if (id == R.id.nav_shop) {
+                startActivity(new Intent(this, ShopActivity.class));
                 return true;
             } else if (id == R.id.nav_ruleta) {
                 startActivity(new Intent(this, RouletteActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             }
             return false;

@@ -16,4 +16,8 @@
         android:id="@+id/nav_ruleta"
         android:icon="@android:drawable/ic_menu_rotate"
         android:title="Roulette" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="Profile" />
 </menu>
