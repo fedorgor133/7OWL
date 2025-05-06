@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+    <TextView
+        android:id="@+id/pointsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:background="@color/blue_dark"
+        android:padding="16dp"
+        android:text="Your points: "
+        android:textColor="@color/white"
+        android:textSize="18sp" />
+
     <!-- Lista de productos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewProducts"
