@@ -130,6 +130,7 @@
                 <!-- Roulette GIF -->
 
                 <!-- Spin Button -->
+
                 <ImageView
                     android:id="@+id/rouletteGifImageView"
                     android:layout_width="match_parent"

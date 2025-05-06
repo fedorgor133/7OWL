@@ -24,12 +24,14 @@ import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
-import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
+import edu.ub.pis2425.projecte7owls.presentation.model.User;
+import edu.ub.pis2425.projecte7owls.presentation.repositories.QuestionRepository;
 
 public class QuizActivity extends AppCompatActivity {
     private ActivityQuizBinding binding;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
+    UserRepository userRepository;
+    QuestionRepository questionRepository;
+
     private List<DocumentSnapshot> questions = new ArrayList<>();
     private TextView pointsTextViewQuiz;
     private int currentQuestionIndex = 0;
@@ -38,7 +40,7 @@ public class QuizActivity extends AppCompatActivity {
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
     private String uid;
-    private UserViewModel userViewModel;
+    private User userViewModel;
 
     private int currentPoints;
 
@@ -48,7 +50,7 @@ public class QuizActivity extends AppCompatActivity {
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(User.class);
         pointsTextViewQuiz = findViewById(R.id.pointsTextViewQuiz);
 
         db = FirebaseFirestore.getInstance();
