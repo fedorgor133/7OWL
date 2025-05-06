@@ -4,6 +4,78 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="16dp">
+
+
+
+        <!-- Mostrar puntos actuales -->
+        <TextView
+            android:id="@+id/pointsTextViewProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:text="Points: 0"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:id="@+id/profileAvatarImageView"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/buho3" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email: "
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:id="@+id/emailTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="example@gmail.com"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_marginBottom="8dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Entry Date: "
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:id="@+id/entryDateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="XX/XX/XXXX"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_marginBottom="8dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- Barra inferior -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

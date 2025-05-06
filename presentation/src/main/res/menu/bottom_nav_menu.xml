@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_contador"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/timer_24px"
         android:title="Counter" />
     <item
         android:id="@+id/nav_quiz"
-        android:icon="@android:drawable/ic_menu_info_details"
+        android:icon="@drawable/quiz_24px"
         android:title="Quiz" />
     <item
         android:id="@+id/nav_shop"
-        android:icon="@android:drawable/ic_menu_view"
+        android:icon="@drawable/shopping_bag_24px"
         android:title="Shop" />
     <item
         android:id="@+id/nav_ruleta"
-        android:icon="@android:drawable/ic_menu_rotate"
+        android:icon="@drawable/poker_chip_24px"
         android:title="Roulette" />
     <item
         android:id="@+id/nav_profile"
-        android:icon="@android:drawable/ic_menu_help"
+        android:icon="@drawable/account_circle_24px"
         android:title="Profile" />
 </menu>
