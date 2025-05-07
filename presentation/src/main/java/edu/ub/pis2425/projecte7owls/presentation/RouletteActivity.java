@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class RouletteActivity extends AppCompatActivity {
 
@@ -48,6 +50,8 @@ public class RouletteActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private int currentPoints = 0;
     private String userId;
+    private UserViewModel userViewModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,8 @@ public class RouletteActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
 
         setupBottomNavigation();
         loadUserPoints();
@@ -239,6 +245,7 @@ public class RouletteActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> Log.d("Firestore", "Puntos actualizados correctamente."))
                 .addOnFailureListener(e -> Log.e("Firestore", "Error actualizando puntos", e));
 
+        userViewModel.addScoreHistory(userId, netChange, "Roulette");
         // Muestra un AlertDialog con el resultado.
         new AlertDialog.Builder(RouletteActivity.this)
                 .setTitle("Roulette Results")

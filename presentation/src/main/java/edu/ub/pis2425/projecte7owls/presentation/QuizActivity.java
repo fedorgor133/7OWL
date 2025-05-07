@@ -176,6 +176,7 @@ public class QuizActivity extends AppCompatActivity {
             if (isCorrect) {
                 score += 10;
                 userViewModel.updateUserScore(uid, currentPoints + score);
+                userViewModel.addScoreHistory(uid, 10, "Quiz");
                 Toast.makeText(this, "+10 points! Correct", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();

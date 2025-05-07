@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.Timestamp;
@@ -15,9 +16,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.databinding.ActivityProfileBinding;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
     private ActivityProfileBinding binding;
@@ -28,6 +31,8 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView pointsTextViewProfile;
     private TextView emailTextView;
     private TextView entryDateTextView;
+    private TextView pointsHistoryTextView;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,8 @@ public class ProfileActivity extends AppCompatActivity {
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        pointsHistoryTextView = findViewById(R.id.pointsHistoryTextView);
         pointsTextViewProfile = findViewById(R.id.pointsTextViewProfile);
         emailTextView = findViewById(R.id.emailTextView);
         entryDateTextView = findViewById(R.id.entryDateTextView);
@@ -46,7 +53,9 @@ public class ProfileActivity extends AppCompatActivity {
         setupBottomNavigation();
         loadUserPoints();
         loadUserInfo();
+        loadScoreHistory();
     }
+
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
@@ -71,6 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
             return false;
         });
     }
+
     private void loadUserPoints() {
         if (mAuth.getCurrentUser() != null) {
             db.collection("usuarios").document(uid).get().addOnSuccessListener(document -> {
@@ -107,4 +117,20 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
     }
+    private void loadScoreHistory() {
+        userViewModel.getScoreHistory(uid).observe(this, historyList -> {
+            StringBuilder historyText = new StringBuilder();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+
+            for (Map<String, Object> entry : historyList) {
+                Date date = ((Timestamp) entry.get("timestamp")).toDate();
+                int scoreChange = ((Long) entry.get("scoreChange")).intValue();
+
+                String formattedChange = (scoreChange > 0 ? "+" : "") + scoreChange;
+                historyText.append(sdf.format(date)).append(": ").append(formattedChange).append(" puntos\n");
+            }
+            pointsHistoryTextView.setText(historyText.toString());
+        });
+    }
+
 }

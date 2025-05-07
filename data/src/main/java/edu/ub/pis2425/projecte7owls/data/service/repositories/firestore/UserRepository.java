@@ -4,7 +4,13 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UserRepository implements IUserRepository {
     private final FirebaseFirestore db;
@@ -12,6 +18,38 @@ public class UserRepository implements IUserRepository {
     public UserRepository() {
         db = FirebaseFirestore.getInstance();
     }
+
+    public void addScoreHistory(String userId, int scoreChange, String source) {
+        Map<String, Object> scoreEntry = new HashMap<>();
+        scoreEntry.put("scoreChange", scoreChange);
+        scoreEntry.put("source", source); // "Quiz" o "Roulette"
+        scoreEntry.put("timestamp", new java.util.Date());
+
+        db.collection("usuarios").document(userId).collection("scoreHistory")
+                .add(scoreEntry)
+                .addOnFailureListener(e -> Log.e("Firestore", "Error adding score history", e));
+    }
+
+
+    public MutableLiveData<List<Map<String, Object>>> getScoreHistory(String userId) {
+        MutableLiveData<List<Map<String, Object>>> historyLiveData = new MutableLiveData<>();
+
+        db.collection("usuarios").document(userId).collection("scoreHistory")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(5)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Map<String, Object>> historyList = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        historyList.add(doc.getData());
+                    }
+                    historyLiveData.setValue(historyList);
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error loading score history", e));
+
+        return historyLiveData;
+    }
+
 
     @Override
     public MutableLiveData<Integer> getUserScore(String userId) {
