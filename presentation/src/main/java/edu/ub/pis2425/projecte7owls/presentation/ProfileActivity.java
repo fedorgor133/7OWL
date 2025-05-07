@@ -1,8 +1,10 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView emailTextView;
     private TextView entryDateTextView;
     private TextView pointsHistoryTextView;
+    private ImageView profileImageView;
     private UserViewModel userViewModel;
 
     @Override
@@ -45,6 +48,12 @@ public class ProfileActivity extends AppCompatActivity {
         pointsTextViewProfile = findViewById(R.id.pointsTextViewProfile);
         emailTextView = findViewById(R.id.emailTextView);
         entryDateTextView = findViewById(R.id.entryDateTextView);
+        profileImageView = findViewById(R.id.profileImageView);
+
+        binding.profileImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ImagesActivity.class);
+            startActivityForResult(intent, 1);
+        });
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -54,6 +63,16 @@ public class ProfileActivity extends AppCompatActivity {
         loadUserPoints();
         loadUserInfo();
         loadScoreHistory();
+
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            int imageResource = data.getIntExtra("selectedImage", R.drawable.owl1);
+            binding.profileImageView.setImageResource(imageResource);
+        }
     }
 
     private void setupBottomNavigation() {
@@ -109,6 +128,12 @@ public class ProfileActivity extends AppCompatActivity {
                             Date date = timestamp.toDate(); // Convierte a Date
                             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()); // Formato de fecha
                             entryDateTextView.setText(sdf.format(date)); // Muestra la fecha formateada
+                        }
+                    }
+                    if(document.contains("imagenPerfil")){
+                        int imageId = document.getLong("imagenPerfil").intValue();
+                        if(imageId != 0){
+                            binding.profileImageView.setImageResource(imageId);
                         }
                     }
                 }

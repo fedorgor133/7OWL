@@ -30,7 +30,8 @@
         <activity android:name=".presentation.ContadorActivity" />
         <activity android:name=".presentation.RouletteActivity" />
         <activity android:name=".presentation.ShopActivity" />
-        <activity android:name=".presentation.ProfileActivity" />
+        <activity android:name=".presentation.ProfileActivity"/>
+        <activity android:name=".presentation.ImagesActivity"/>
 
 
     </application>

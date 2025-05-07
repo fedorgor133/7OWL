@@ -76,6 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
         userInfo.put("uid", uid);
         userInfo.put("fechaRegistro", FieldValue.serverTimestamp());
         userInfo.put("points", 0);
+        userInfo.put("imagenPerfil", 0);
 
         db.collection("usuarios").document(uid).set(userInfo)
                 .addOnSuccessListener(unused ->
