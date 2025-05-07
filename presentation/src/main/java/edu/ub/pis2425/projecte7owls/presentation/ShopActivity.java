@@ -19,6 +19,7 @@ public class ShopActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         loadShoppingFragment();
+
     }
 
     private void setupBottomNavigation() {

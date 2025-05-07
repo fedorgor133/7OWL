@@ -1,5 +1,6 @@
 package edu.ub.pis2425.projecte7owls.presentation.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +11,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide; // Necesitas Glide
+import com.bumptech.glide.Glide;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.domain.entities.Product;
@@ -24,10 +28,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private List<Product> productList;
     private OnProductClickListener listener;
+    private Set<Product> selectedProducts = new HashSet<>(); // ← NUEVO
 
     public ProductAdapter(List<Product> productList, OnProductClickListener listener) {
         this.productList = productList;
         this.listener = listener;
+    }
+
+    public boolean isProductSelected(Product product) {
+        return selectedProducts.contains(product);
     }
 
     @NonNull
@@ -41,15 +50,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.bind(product, listener);
+        holder.bind(product, listener, selectedProducts.contains(product));
     }
 
     @Override
     public int getItemCount() {
         return productList.size();
     }
+    public void clearSelection() {
+        selectedProducts.clear();
+        notifyDataSetChanged();
+    }
 
-    static class ProductViewHolder extends RecyclerView.ViewHolder {
+
+    class ProductViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageViewProduct;
         private TextView textViewName;
@@ -66,7 +80,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             buttonAddToCart = itemView.findViewById(R.id.buttonAddToCart);
         }
 
-        public void bind(final Product product, final OnProductClickListener listener) {
+        public void bind(final Product product, final OnProductClickListener listener, boolean isSelected) {
             Glide.with(itemView.getContext())
                     .load(product.getImageUrl())
                     .into(imageViewProduct);
@@ -75,8 +89,31 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             textViewDescription.setText(product.getDescription());
             textViewPrice.setText(String.format("%d points", product.getPrice()));
 
-            buttonAddToCart.setOnClickListener(v -> listener.onProductClick(product));
+            updateButtonAppearance(isSelected);
+
+            buttonAddToCart.setOnClickListener(v -> {
+                boolean added;
+                if (selectedProducts.contains(product)) {
+                    selectedProducts.remove(product);
+                    added = false;
+                } else {
+                    selectedProducts.add(product);
+                    added = true;
+                }
+
+                updateButtonAppearance(added);
+                listener.onProductClick(product);
+            });
+        }
+
+        private void updateButtonAppearance(boolean isSelected) {
+            if (isSelected) {
+                buttonAddToCart.setText("Remove");
+                buttonAddToCart.setBackgroundColor(Color.GRAY);
+            } else {
+                buttonAddToCart.setText("Add to Cart");
+                buttonAddToCart.setBackgroundColor(itemView.getResources().getColor(R.color.blue_dark));
+            }
         }
     }
 }
-

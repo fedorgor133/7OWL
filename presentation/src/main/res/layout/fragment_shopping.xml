@@ -6,16 +6,33 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/pointsTextView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:background="@color/blue_dark"
+        android:orientation="horizontal"
         android:padding="16dp"
-        android:text="Your points: "
-        android:textColor="@color/white"
-        android:textSize="18sp" />
+        android:background="@color/blue_dark"
+        android:gravity="center_vertical|end"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/pointsTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Your points: "
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnHistorial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Historial"
+            android:textColor="@color/blue_dark"
+            android:backgroundTint="@color/white"/>
+    </LinearLayout>
+
 
     <!-- Lista de productos -->
     <androidx.recyclerview.widget.RecyclerView
@@ -48,6 +65,7 @@
             android:id="@+id/buttonCheckout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/blue_dark"
             android:text="Buy" />
     </LinearLayout>
 

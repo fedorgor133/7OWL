@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -46,6 +47,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
     private FirebaseFirestore db;
     private int currentPoints = 0;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -57,6 +59,11 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         buttonCheckout = view.findViewById(R.id.buttonCheckout);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         pointsTextView = view.findViewById(R.id.pointsTextView);
+        Button buttonHistorial = view.findViewById(R.id.btnHistorial);
+        buttonHistorial.setOnClickListener(v -> {
+            new HistorialDialogFragment().show(getParentFragmentManager(), "HistorialDialog");
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         productList = new ArrayList<>();
         adapter = new ProductAdapter(productList, this);
@@ -112,14 +119,43 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
     }
 
     private void handlePurchase(int cost) {
-        if (currentPoints >= cost){
-            int updatePoints = currentPoints - cost;
-            userViewModel.updateUserScore(uid, updatePoints);
-            Toast.makeText(getContext(), "Items successfully purchased! - " + cost + " points", Toast.LENGTH_SHORT).show();
+        if (currentPoints >= cost) {
+            int updatedPoints = currentPoints - cost;
+            userViewModel.updateUserScore(uid, updatedPoints);
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            long timestamp = System.currentTimeMillis();
+            String fechaCompra = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(new java.util.Date(timestamp));
+
+            for (Product product : productList) {
+                if (adapter.isProductSelected(product)) { /
+
+                    // Crear los datos de la compra
+                    HashMap<String, Object> compra = new HashMap<>();
+                    compra.put("nombre", product.getName());
+                    compra.put("precio", product.getPrice());
+                    compra.put("imagen", product.getImageUrl()); // Asegúrate de tener getImageUrl() en Product
+                    compra.put("fechaCompra", fechaCompra);
+
+                    // Guardar en Firestore: usuarios/{uid}/historial_compras
+                    db.collection("usuarios")
+                            .document(uid)
+                            .collection("historial_compras")
+                            .add(compra)
+                            .addOnSuccessListener(ref -> Log.d(TAG, "Producto comprado: " + product.getName()))
+                            .addOnFailureListener(e -> Log.e(TAG, "Error al guardar compra", e));
+                }
+            }
+
+            Toast.makeText(getContext(), "Compra realizada con éxito", Toast.LENGTH_SHORT).show();
+            adapter.clearSelection();
+            textViewTotal.setText("Total: 0 points");
         } else {
-            Toast.makeText(getContext(), "Insufficient points", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No tienes puntos suficientes", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
 }
