@@ -129,7 +129,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
             String fechaCompra = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(new java.util.Date(timestamp));
 
             for (Product product : productList) {
-                if (adapter.isProductSelected(product)) { /
+                if (adapter.isProductSelected(product)) {
 
                     // Crear los datos de la compra
                     HashMap<String, Object> compra = new HashMap<>();
