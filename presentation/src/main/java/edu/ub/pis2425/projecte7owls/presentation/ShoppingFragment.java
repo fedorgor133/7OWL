@@ -59,10 +59,16 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         buttonCheckout = view.findViewById(R.id.buttonCheckout);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         pointsTextView = view.findViewById(R.id.pointsTextView);
-        Button buttonHistorial = view.findViewById(R.id.btnHistorial);
-        buttonHistorial.setOnClickListener(v -> {
-            new HistorialDialogFragment().show(getParentFragmentManager(), "HistorialDialog");
+        Button btnHistorial =view.findViewById(R.id.btnHistorial);
+        btnHistorial.setOnClickListener(v -> {
+            Log.d("ShoppingFragment", "Botón Historial clickeado");
+            Toast.makeText(getContext(), "Botón Historial pulsado", Toast.LENGTH_SHORT).show();
+            HistorialDialogFragment dialog = new HistorialDialogFragment();
+            dialog.show(requireActivity().getSupportFragmentManager(), "HistorialDialog");
         });
+
+
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         productList = new ArrayList<>();
@@ -155,6 +161,8 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
             Toast.makeText(getContext(), "No tienes puntos suficientes", Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
 
 
