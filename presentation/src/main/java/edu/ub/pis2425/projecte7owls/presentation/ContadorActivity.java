@@ -15,8 +15,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.Timestamp;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -31,6 +34,8 @@ public class ContadorActivity extends AppCompatActivity {
 
     // Guardamos la fecha de registro una vez obtenida
     private Timestamp fechaRegistro;
+    private Timestamp ultimoRegistro;
+    private int numQuiz;
 
     // Lista para almacenar los consejos cargados desde Firestore.
     private final List<AdviceMessage> adviceList = new ArrayList<>();
@@ -85,6 +90,7 @@ public class ContadorActivity extends AppCompatActivity {
         resetButton.setOnClickListener(v -> mostrarConfirmacionReset());
 
         loadAdviceMessages();
+        comprovarUltimoRegistro();
     }
 
     @Override
@@ -95,7 +101,7 @@ public class ContadorActivity extends AppCompatActivity {
 
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
-            obtenerFechaRegistro(userId);
+            obtenerFecha(userId,"fechaRegistro");
         }
     }
 
@@ -123,20 +129,24 @@ public class ContadorActivity extends AppCompatActivity {
                 .update("fechaRegistro", FieldValue.serverTimestamp())
                 .addOnSuccessListener(aVoid -> {
                     Log.d("Firestore", "Fecha de inicio reiniciada correctamente.");
-                    obtenerFechaRegistro(userId);
+                    obtenerFecha(userId,"fechaRegistro");
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al resetear contador", e));
     }
 
-    private void obtenerFechaRegistro(String userId) {
+    private void obtenerFecha(String userId,String fecha) {
         db.collection("usuarios").document(userId)
                 .get()
                 .addOnSuccessListener(document -> {
-                    if (document.exists() && document.contains("fechaRegistro")) {
-                        Timestamp ts = document.getTimestamp("fechaRegistro");
+                    if (document.exists() && document.contains(fecha)) {
+                        Timestamp ts = document.getTimestamp(fecha);
                         if (ts != null) {
-                            // Guardamos la fecha inicial para que el Runnable actualice la UI.
-                            fechaRegistro = ts;
+                            if (fecha.equals("fechaRegistro")) {
+                                // Guardamos la fecha inicial para que el Runnable actualice la UI.
+                                fechaRegistro = ts;
+                            }else if(fecha.equals("ultimoRegistro")){
+                                ultimoRegistro = ts;
+                            }
                         }
                     }
                 })
@@ -172,6 +182,30 @@ public class ContadorActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+    // Comprueba si la fecha del ultimo registro es de un dia diferente al actual para restringir el numero de Quiz al dia
+    private void comprovarUltimoRegistro(){
+        if (auth.getCurrentUser() != null) {
+            String userId = auth.getCurrentUser().getUid();
+            obtenerFecha(userId,"ultimoRegistro");
+            String ultimoRegistroS= convertirTimeStampDia(ultimoRegistro);
+            String fechaActual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+            if (!fechaActual.equals(ultimoRegistroS)){
+                //TODO numQuiz = 0 BASE DE DATOS
+            }
+        }
+    }
+    private String convertirTimeStampDia(Timestamp ts){
+        String fechaTsString=null;
+        if(ts != null){
+            Date fecha = ts.toDate();
+            // Definir el formato dd/MM/yyyy
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            // Convertir la fecha a String
+            fechaTsString = dateFormat.format(fecha);
+        }
+        return fechaTsString;
+
     }
 
     private void setupBottomNavigation() {
