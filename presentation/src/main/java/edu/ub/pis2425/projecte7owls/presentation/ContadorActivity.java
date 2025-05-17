@@ -101,7 +101,7 @@ public class ContadorActivity extends AppCompatActivity {
 
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
-            obtenerFecha(userId,"fechaRegistro");
+            obtenerFechaRegistro(userId);
         }
     }
 
@@ -129,24 +129,32 @@ public class ContadorActivity extends AppCompatActivity {
                 .update("fechaRegistro", FieldValue.serverTimestamp())
                 .addOnSuccessListener(aVoid -> {
                     Log.d("Firestore", "Fecha de inicio reiniciada correctamente.");
-                    obtenerFecha(userId,"fechaRegistro");
+                    obtenerFechaRegistro(userId);
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al resetear contador", e));
     }
-
-    private void obtenerFecha(String userId,String fecha) {
+    private void obtenerFechaRegistro(String userId) {
         db.collection("usuarios").document(userId)
                 .get()
                 .addOnSuccessListener(document -> {
-                    if (document.exists() && document.contains(fecha)) {
-                        Timestamp ts = document.getTimestamp(fecha);
+                    if (document.exists() && document.contains("fechaRegistro")) {
+                        Timestamp ts = document.getTimestamp("fechaRegistro");
                         if (ts != null) {
-                            if (fecha.equals("fechaRegistro")) {
-                                // Guardamos la fecha inicial para que el Runnable actualice la UI.
-                                fechaRegistro = ts;
-                            }else if(fecha.equals("ultimoRegistro")){
-                                ultimoRegistro = ts;
-                            }
+                            // Guardamos la fecha inicial para que el Runnable actualice la UI.
+                            fechaRegistro = ts;
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener datos del usuario", e));
+    }
+    private void obtenerFechaUltimoRegistro(String userId) {
+        db.collection("usuarios").document(userId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists() && document.contains("ultimoRegistro")) {
+                        Timestamp ts = document.getTimestamp("ultimoRegistro");
+                        if (ts != null) {
+                            ultimoRegistro = ts;
                         }
                     }
                 })
@@ -184,17 +192,23 @@ public class ContadorActivity extends AppCompatActivity {
         return null;
     }
     // Comprueba si la fecha del ultimo registro es de un dia diferente al actual para restringir el numero de Quiz al dia
-    private void comprovarUltimoRegistro(){
+    private void comprovarUltimoRegistro() {
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
-            obtenerFecha(userId,"ultimoRegistro");
-            String ultimoRegistroS= convertirTimeStampDia(ultimoRegistro);
-            String fechaActual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
-            if (!fechaActual.equals(ultimoRegistroS)){
-                db.collection("usuarios").document(userId).collection("numQuiz")
-                        .add(0)
-                        .addOnFailureListener(e -> Log.e("Firestore", "Error adding numQuiz", e));
-            }
+            obtenerFechaUltimoRegistro(userId);
+
+            // Usar un Handler con un pequeño retraso
+            new Handler().postDelayed(() -> {
+                if (ultimoRegistro != null) {
+                    String ultimoRegistroS = convertirTimeStampDia(ultimoRegistro);
+                    String fechaActual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+
+                    if (!fechaActual.equals(ultimoRegistroS)) {
+                        db.collection("usuarios").document(userId).update("numQuiz", 0)
+                                .addOnFailureListener(e -> Log.e("Firestore", "Error updating numQuiz", e));
+                    }
+                }
+            }, 500); // Esperar 500ms antes de ejecutar la lógica
         }
     }
     private String convertirTimeStampDia(Timestamp ts){

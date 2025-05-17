@@ -116,8 +116,8 @@ public class QuizActivity extends AppCompatActivity {
                         Long numQuizL = document.getLong("numQuiz");
                         numQuiz = numQuizL.intValue();
                         if (numQuiz == 3) {
-                            //TODO: Q salte notificacion de que no se puede hacer mas quiz
-
+                            Toast.makeText(this, "You have already done 3 quizzes today", Toast.LENGTH_LONG).show();
+                            finish();
                         }
                     }
                 })
@@ -227,6 +227,9 @@ public class QuizActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc ->
                         Toast.makeText(this, "Quiz finished! Score: " + score + " points", Toast.LENGTH_LONG).show()
                 );
+        db.collection("usuarios").document(uid)
+                .update("numQuiz",numQuiz+1)
+                .addOnFailureListener(e -> Log.e("Firestore", "Error incrementando numQuiz", e));
 
         finish();
     }
