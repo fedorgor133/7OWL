@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,6 +35,7 @@ public class QuizActivity extends AppCompatActivity {
     private TextView pointsTextViewQuiz;
     private int currentQuestionIndex = 0;
     private int score = 0;
+    private int numQuiz=0;
     private final int totalQuestions = 10;
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
@@ -59,6 +61,7 @@ public class QuizActivity extends AppCompatActivity {
 
         uid = mAuth.getCurrentUser().getUid();
         observeUserScore();
+        comprovarNumQuiz();
         setupBottomNavigation();
         loadQuestions();
         loadUserPoints();
@@ -104,6 +107,21 @@ public class QuizActivity extends AppCompatActivity {
                 Log.e("Firestore", "Error loading points", e);
             });
         }
+    }
+    private void comprovarNumQuiz(){
+        db.collection("usuarios").document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists() && document.contains("numQuiz")) {
+                        Long numQuizL = document.getLong("numQuiz");
+                        numQuiz = numQuizL.intValue();
+                        if (numQuiz == 3) {
+                            //TODO: Q salte notificacion de que no se puede hacer mas quiz
+
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener numQuiz del usuario", e));
     }
 
     private void loadQuestions() {
@@ -161,7 +179,7 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select an option", Toast.LENGTH_SHORT).show();
                 return;
             }
-
+            
             resetInactivityTimer();
 
             RadioButton selected = findViewById(selectedId);

@@ -191,7 +191,9 @@ public class ContadorActivity extends AppCompatActivity {
             String ultimoRegistroS= convertirTimeStampDia(ultimoRegistro);
             String fechaActual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
             if (!fechaActual.equals(ultimoRegistroS)){
-                //TODO numQuiz = 0 BASE DE DATOS
+                db.collection("usuarios").document(userId).collection("numQuiz")
+                        .add(0)
+                        .addOnFailureListener(e -> Log.e("Firestore", "Error adding numQuiz", e));
             }
         }
     }
@@ -205,7 +207,6 @@ public class ContadorActivity extends AppCompatActivity {
             fechaTsString = dateFormat.format(fecha);
         }
         return fechaTsString;
-
     }
 
     private void setupBottomNavigation() {
