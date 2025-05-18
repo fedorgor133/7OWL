@@ -13,8 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -23,20 +25,25 @@ import edu.ub.pis2425.projecte7owls.domain.entities.Product;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
     public interface OnProductClickListener {
-        void onProductClick(Product product);
+        void onProductClick(Product product, int quantity);
     }
 
     private List<Product> productList;
     private OnProductClickListener listener;
-    private Set<Product> selectedProducts = new HashSet<>(); // ← NUEVO
+    private Map<Product, Integer> selectedProducts = new HashMap<>();
 
     public ProductAdapter(List<Product> productList, OnProductClickListener listener) {
         this.productList = productList;
         this.listener = listener;
     }
 
-    public boolean isProductSelected(Product product) {
-        return selectedProducts.contains(product);
+    public Map<Product, Integer> getSelectedProducts() {
+        return selectedProducts;
+    }
+
+    public void clearSelection() {
+        selectedProducts.clear();
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -50,18 +57,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.bind(product, listener, selectedProducts.contains(product));
+        int quantity = selectedProducts.getOrDefault(product, 0);
+        holder.bind(product, quantity);
     }
 
     @Override
     public int getItemCount() {
         return productList.size();
     }
-    public void clearSelection() {
-        selectedProducts.clear();
-        notifyDataSetChanged();
-    }
-
 
     class ProductViewHolder extends RecyclerView.ViewHolder {
 
@@ -80,7 +83,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             buttonAddToCart = itemView.findViewById(R.id.buttonAddToCart);
         }
 
-        public void bind(final Product product, final OnProductClickListener listener, boolean isSelected) {
+        public void bind(final Product product, int quantity) {
             Glide.with(itemView.getContext())
                     .load(product.getImageUrl())
                     .into(imageViewProduct);
@@ -88,28 +91,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             textViewName.setText(product.getName());
             textViewDescription.setText(product.getDescription());
             textViewPrice.setText(String.format("%d points", product.getPrice()));
-
-            updateButtonAppearance(isSelected);
+            updateButtonAppearance(quantity);
 
             buttonAddToCart.setOnClickListener(v -> {
-                boolean added;
-                if (selectedProducts.contains(product)) {
-                    selectedProducts.remove(product);
-                    added = false;
-                } else {
-                    selectedProducts.add(product);
-                    added = true;
-                }
-
-                updateButtonAppearance(added);
-                listener.onProductClick(product);
+                int newQuantity = selectedProducts.getOrDefault(product, 0) + 1;
+                selectedProducts.put(product, newQuantity);
+                updateButtonAppearance(newQuantity);
+                listener.onProductClick(product, newQuantity);
             });
         }
 
-        private void updateButtonAppearance(boolean isSelected) {
-            if (isSelected) {
-                buttonAddToCart.setText("Remove");
-                buttonAddToCart.setBackgroundColor(Color.GRAY);
+        private void updateButtonAppearance(int quantity) {
+            if (quantity > 0) {
+                buttonAddToCart.setText("Added: " + quantity);
+                buttonAddToCart.setBackgroundColor(Color.parseColor("#4CAF50")); // Verde
             } else {
                 buttonAddToCart.setText("Add to Cart");
                 buttonAddToCart.setBackgroundColor(itemView.getResources().getColor(R.color.blue_dark));
@@ -117,3 +112,4 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         }
     }
 }
+

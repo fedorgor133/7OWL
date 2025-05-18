@@ -1,6 +1,7 @@
 package edu.ub.pis2425.projecte7owls.domain.entities;
 
 public class Product {
+    private String id;
     private String name;
     private String description;
     private int price;
@@ -14,6 +15,11 @@ public class Product {
         this.description = description;
         this.price = price;
         this.imageUrl = imageUrl;
+    }
+    public Product(String id, String name, int price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
     }
 
     public String getName() { return name; }

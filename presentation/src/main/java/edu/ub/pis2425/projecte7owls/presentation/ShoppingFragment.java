@@ -24,6 +24,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.domain.entities.Product;
@@ -119,10 +120,11 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
     }
 
     @Override
-    public void onProductClick(Product product) {
+    public void onProductClick(Product product, int quantity) {
         totalPrice += product.getPrice();
         textViewTotal.setText(String.format("Total: %d points", totalPrice));
     }
+
 
     private void handlePurchase(int cost) {
         if (currentPoints >= cost) {
@@ -130,21 +132,22 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
             userViewModel.updateUserScore(uid, updatedPoints);
 
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-
             long timestamp = System.currentTimeMillis();
             String fechaCompra = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(new java.util.Date(timestamp));
 
-            for (Product product : productList) {
-                if (adapter.isProductSelected(product)) {
+            Map<Product, Integer> selectedProducts = adapter.getSelectedProducts();
 
-                    // Crear los datos de la compra
+            for (Map.Entry<Product, Integer> entry : selectedProducts.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+
+                for (int i = 0; i < quantity; i++) {
                     HashMap<String, Object> compra = new HashMap<>();
                     compra.put("nombre", product.getName());
                     compra.put("precio", product.getPrice());
-                    compra.put("imagen", product.getImageUrl()); // Asegúrate de tener getImageUrl() en Product
+                    compra.put("imagen", product.getImageUrl());
                     compra.put("fechaCompra", fechaCompra);
 
-                    // Guardar en Firestore: usuarios/{uid}/historial_compras
                     db.collection("usuarios")
                             .document(uid)
                             .collection("historial_compras")
@@ -156,11 +159,14 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
 
             Toast.makeText(getContext(), "Compra realizada con éxito", Toast.LENGTH_SHORT).show();
             adapter.clearSelection();
+            totalPrice = 0;
             textViewTotal.setText("Total: 0 points");
+
         } else {
             Toast.makeText(getContext(), "No tienes puntos suficientes", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
 
