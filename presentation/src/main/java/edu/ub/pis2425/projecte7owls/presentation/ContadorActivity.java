@@ -11,12 +11,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.Timestamp;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
@@ -30,6 +35,7 @@ public class ContadorActivity extends AppCompatActivity {
     private FirebaseFirestore db;
 
     // Guardamos la fecha de registro una vez obtenida
+    private Timestamp fechaReset;
     private Timestamp fechaRegistro;
 
     // Lista para almacenar los consejos cargados desde Firestore.
@@ -40,8 +46,8 @@ public class ContadorActivity extends AppCompatActivity {
     private final Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
-            if (fechaRegistro != null) {
-                long diasSimulados = calcularDias(fechaRegistro, Timestamp.now());
+            if (fechaReset != null) {
+                long diasSimulados = calcularDias(fechaReset, Timestamp.now());
                 diasTextView.setText("You have been clean " + diasSimulados + " day(s).");
                 String advice = getAdviceForDays(diasSimulados);
                 if (advice != null) {
@@ -96,6 +102,7 @@ public class ContadorActivity extends AppCompatActivity {
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
             obtenerFechaRegistro(userId);
+            mostrarResetMensaje(userId);
         }
     }
 
@@ -118,15 +125,30 @@ public class ContadorActivity extends AppCompatActivity {
     private void resetearContador() {
         if (auth.getCurrentUser() == null) return;
         String userId = auth.getCurrentUser().getUid();
+        DocumentReference userRef = db.collection("usuarios").document(userId);
 
-        db.collection("usuarios").document(userId)
-                .update("fechaRegistro", FieldValue.serverTimestamp())
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Fecha de inicio reiniciada correctamente.");
-                    obtenerFechaRegistro(userId);
+        userRef.get()
+                .addOnSuccessListener(document -> {
+                    long currentCount = 0;
+                    if (document.exists() && document.contains("resetCount")) {
+                        currentCount = document.getLong("resetCount");
+                    }
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("fechaReset", FieldValue.serverTimestamp());
+                    updates.put("resetCount", currentCount + 1);
+
+                    userRef.update(updates)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("Firestore", "fechaReset y resetCount actualizados.");
+                                mostrarResetMensaje(userId); // Refresh info shown to user
+                            })
+                            .addOnFailureListener(e -> Log.e("Firestore", "Error al actualizar datos del usuario", e));
                 })
-                .addOnFailureListener(e -> Log.e("Firestore", "Error al resetear contador", e));
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener el documento del usuario", e));
     }
+
+
 
     private void obtenerFechaRegistro(String userId) {
         db.collection("usuarios").document(userId)
@@ -162,6 +184,7 @@ public class ContadorActivity extends AppCompatActivity {
                     });
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error loading advice messages", e));
+
     }
 
     // Devuelve el mensaje adecuado según los días simulados.
@@ -173,6 +196,42 @@ public class ContadorActivity extends AppCompatActivity {
         }
         return null;
     }
+
+    private void mostrarResetMensaje(String userId) {
+        db.collection("usuarios").document(userId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        Timestamp fechaRegistro = document.getTimestamp("fechaRegistro");
+                        this.fechaReset = document.getTimestamp("fechaReset");
+                        long resetCount = document.contains("resetCount") ? document.getLong("resetCount") : 0;
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+
+                        String fechaRegistroStr = (fechaRegistro != null) ? sdf.format(fechaRegistro.toDate()) : "unknown";
+                        String fechaResetStr = (fechaReset != null) ? sdf.format(fechaReset.toDate()) : "never";
+
+                        String mensaje = "You joined on " + fechaRegistroStr + ".\n";
+                        mensaje += "Last reset: " + fechaResetStr + ".\n";
+                        mensaje += "You've restarted your journey " + resetCount + " time(s). ";
+
+                        if (resetCount == 0) {
+                            mensaje += "Keep it up!";
+                        } else if (resetCount < 3) {
+                            mensaje += "Each reset is a step forward. Stay strong!";
+                        } else if (resetCount < 5) {
+                            mensaje += "Progress isn't linear. You're learning!";
+                        } else {
+                            mensaje += "Many resets? That means you keep trying. That's courage!";
+                        }
+
+                        TextView userInfo = findViewById(R.id.textViewUserInfo);
+                        userInfo.setText(mensaje);
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error loading reset count", e));
+    }
+
 
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);

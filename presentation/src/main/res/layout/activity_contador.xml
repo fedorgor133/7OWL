@@ -9,32 +9,32 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="706dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
+        android:padding="24dp">
 
         <!-- Contador: Días sin apostar -->
         <TextView
             android:id="@+id/diasTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="16dp"
             android:text="Loading..."
             android:textColor="@color/teal_700"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="300px"/>
+            android:textStyle="bold" />
 
         <!-- TextView para mostrar el consejo/advice -->
         <TextView
             android:id="@+id/adviceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Loading advice..."
             android:textColor="@color/black"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp"/>
+            android:textSize="16sp" />
 
         <!-- Botón para resetear -->
         <com.google.android.material.button.MaterialButton
@@ -42,11 +42,11 @@
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reset Counter"
-            android:textColor="@android:color/white"
+            android:layout_marginBottom="32dp"
             android:backgroundTint="@color/red"
             android:elevation="4dp"
-            android:layout_marginBottom="32dp"/>
+            android:text="Reset Counter"
+            android:textColor="@android:color/white" />
 
         <!-- Resto de la vista... -->
         <TextView
@@ -59,6 +59,32 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="30dp"
+            android:background="#000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:text="USER HISTORY:" />
+
+
+        <TextView
+            android:id="@+id/textViewUserInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="30dp"
+            android:lineSpacingExtra="6dp"
+            android:text="Loading user info..."
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+        />
     </LinearLayout>
 
 
