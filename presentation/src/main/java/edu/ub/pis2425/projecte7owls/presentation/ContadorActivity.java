@@ -238,21 +238,31 @@ public class ContadorActivity extends AppCompatActivity {
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.nav_contador) {
-                return true;
+                return true; // Ya estás en esta actividad, no haces nada
             } else if (id == R.id.nav_quiz) {
-                startActivity(new Intent(this, QuizActivity.class));
+                Intent intent = new Intent(this, QuizActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_shop) {
-                startActivity(new Intent(this, ShopActivity.class));
+                Intent intent = new Intent(this, ShopActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_ruleta) {
-                startActivity(new Intent(this, RouletteActivity.class));
+                Intent intent = new Intent(this, RouletteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
+                Intent intent = new Intent(this, ProfileActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             }
+
             return false;
         });
     }

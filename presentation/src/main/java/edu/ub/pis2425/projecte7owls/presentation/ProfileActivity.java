@@ -81,21 +81,31 @@ public class ProfileActivity extends AppCompatActivity {
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.nav_contador) {
-                startActivity(new Intent(this, ContadorActivity.class));
+                Intent intent = new Intent(this, ContadorActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_quiz) {
-                startActivity(new Intent(this, QuizActivity.class));
+                Intent intent = new Intent(this, QuizActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_shop) {
-                startActivity(new Intent(this, ShopActivity.class));
+                Intent intent = new Intent(this, ShopActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_ruleta) {
-                startActivity(new Intent(this, RouletteActivity.class));
+                Intent intent = new Intent(this, RouletteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
                 return true;
             } else if (id == R.id.nav_profile) {
                 return true;
             }
+
             return false;
         });
     }
