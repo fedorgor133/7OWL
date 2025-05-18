@@ -29,15 +29,13 @@ import edu.ub.pis2425.projecte7owls.R;
 public class ContadorActivity extends AppCompatActivity {
 
     private TextView diasTextView;
-    private TextView adviceTextView;  // Nuevo TextView para los mensajes de consejo
+    private TextView adviceTextView;
+    private TextView userInfotextView;
     private Button resetButton;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-
-    // Guardamos la fecha de registro una vez obtenida
     private Timestamp fechaReset;
     private Timestamp fechaRegistro;
-
     // Lista para almacenar los consejos cargados desde Firestore.
     private final List<AdviceMessage> adviceList = new ArrayList<>();
 
@@ -83,6 +81,7 @@ public class ContadorActivity extends AppCompatActivity {
         diasTextView = findViewById(R.id.diasTextView);
         adviceTextView = findViewById(R.id.adviceTextView);
         resetButton = findViewById(R.id.resetButton);
+        userInfotextView = findViewById(R.id.textViewUserInfo);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -141,7 +140,8 @@ public class ContadorActivity extends AppCompatActivity {
                     userRef.update(updates)
                             .addOnSuccessListener(aVoid -> {
                                 Log.d("Firestore", "fechaReset y resetCount actualizados.");
-                                mostrarResetMensaje(userId); // Refresh info shown to user
+                                // Delay a bit before showing updated data
+                                new Handler().postDelayed(() -> mostrarResetMensaje(userId), 500);
                             })
                             .addOnFailureListener(e -> Log.e("Firestore", "Error al actualizar datos del usuario", e));
                 })
@@ -225,8 +225,7 @@ public class ContadorActivity extends AppCompatActivity {
                             mensaje += "Many resets? That means you keep trying. That's courage!";
                         }
 
-                        TextView userInfo = findViewById(R.id.textViewUserInfo);
-                        userInfo.setText(mensaje);
+                        userInfotextView.setText(mensaje);
                     }
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error loading reset count", e));
