@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,6 +27,8 @@ import edu.ub.pis2425.projecte7owls.databinding.ActivityProfileBinding;
 import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
+    private Button scoreHistorybttn;
+    private FloatingActionButton helpButton;
     private ActivityProfileBinding binding;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -44,7 +48,6 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        pointsHistoryTextView = findViewById(R.id.pointsHistoryTextView);
         pointsTextViewProfile = findViewById(R.id.pointsTextViewProfile);
         emailTextView = findViewById(R.id.emailTextView);
         entryDateTextView = findViewById(R.id.entryDateTextView);
@@ -58,11 +61,21 @@ public class ProfileActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getCurrentUser().getUid();
+        scoreHistorybttn = findViewById(R.id.scoreButton);
+        scoreHistorybttn.setOnClickListener(v -> {
+            ScoreDialogFragment scoreDialogFragment = ScoreDialogFragment.newInstance(uid);
+            scoreDialogFragment.show(getSupportFragmentManager(), "scoreDialogFragment");
+        });
 
+        helpButton = findViewById(R.id.helpFab);
+        helpButton.setOnClickListener(v -> {
+            HelpDialogFragment helpDialogFragment = new HelpDialogFragment();
+            helpDialogFragment.show(getSupportFragmentManager(), "helpDialogFragment");
+        });
         setupBottomNavigation();
         loadUserPoints();
         loadUserInfo();
-        loadScoreHistory();
+
 
 
     }
@@ -142,20 +155,6 @@ public class ProfileActivity extends AppCompatActivity {
             });
         }
     }
-    private void loadScoreHistory() {
-        userViewModel.getScoreHistory(uid).observe(this, historyList -> {
-            StringBuilder historyText = new StringBuilder();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-            for (Map<String, Object> entry : historyList) {
-                Date date = ((Timestamp) entry.get("timestamp")).toDate();
-                int scoreChange = ((Long) entry.get("scoreChange")).intValue();
-
-                String formattedChange = (scoreChange > 0 ? "+" : "") + scoreChange;
-                historyText.append(sdf.format(date)).append(": ").append(formattedChange).append(" puntos\n");
-            }
-            pointsHistoryTextView.setText(historyText.toString());
-        });
-    }
 
 }

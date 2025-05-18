@@ -76,7 +76,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         // Observa los puntos del usuario
         userViewModel.observeUserScore(uid).observe(getViewLifecycleOwner(), score -> {
             currentPoints = score != null ? score : 0;
-            pointsTextView.setText("Your points: " + currentPoints);
+            pointsTextView.setText("Your points: " + currentPoints + " owls");
         });
 
 
@@ -85,7 +85,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
                 android.widget.Toast.makeText(getContext(), "Comprando productos: " + totalPrice + " points", android.widget.Toast.LENGTH_SHORT).show();
                 handlePurchase(totalPrice);
                 totalPrice = 0;
-                textViewTotal.setText("Total: 0 points");
+                textViewTotal.setText("Total: 0 owls");
 
             }
         });

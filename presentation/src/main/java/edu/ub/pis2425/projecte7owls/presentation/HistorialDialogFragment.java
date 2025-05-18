@@ -75,7 +75,7 @@ public class HistorialDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        // Expandir ancho del diálogo al máximo del padre
+        //expandir ancho del diálogo al máximo del padre
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setLayout(
                     ViewGroup.LayoutParams.MATCH_PARENT,

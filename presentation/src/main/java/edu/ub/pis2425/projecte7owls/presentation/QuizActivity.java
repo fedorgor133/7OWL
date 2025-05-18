@@ -177,7 +177,7 @@ public class QuizActivity extends AppCompatActivity {
                 score += 10;
                 userViewModel.updateUserScore(uid, currentPoints + score);
                 userViewModel.addScoreHistory(uid, 10, "Quiz");
-                Toast.makeText(this, "+10 points! Correct", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "+10 owls! Correct", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();
             }
@@ -207,7 +207,7 @@ public class QuizActivity extends AppCompatActivity {
         db.collection("results")
                 .add(result)
                 .addOnSuccessListener(doc ->
-                        Toast.makeText(this, "Quiz finished! Score: " + score + " points", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Quiz finished! Score: " + score + " owls", Toast.LENGTH_LONG).show()
                 );
 
         finish();
@@ -215,7 +215,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private void observeUserScore() {
         userViewModel.observeUserScore(uid).observe(this, score -> {
-            pointsTextViewQuiz.setText("Points: " + score);
+            pointsTextViewQuiz.setText("Points: " + score + " owls");
         });
     }
 

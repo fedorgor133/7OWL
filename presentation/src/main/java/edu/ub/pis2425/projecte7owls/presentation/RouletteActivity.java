@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -29,13 +30,16 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.Timestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import edu.ub.pis2425.projecte7owls.R;
+import edu.ub.pis2425.projecte7owls.domain.entities.AdviceMessage;
 import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class RouletteActivity extends AppCompatActivity {
@@ -51,11 +55,21 @@ public class RouletteActivity extends AppCompatActivity {
     private int currentPoints = 0;
     private String userId;
     private UserViewModel userViewModel;
+    /*
+    Variables per MPV4: Notificació de temps no net
+     */
+    private List<AdviceMessage> adviceList = new ArrayList<>();
+    /*
+
+     */
+    private long totalPlayTimeMillis = 0;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.onResume();
         setContentView(R.layout.activity_roulette);
 
         // Inicializa los widgets
@@ -73,7 +87,7 @@ public class RouletteActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
-
+        cargarConsejosDesdeFirestore();
         setupBottomNavigation();
         loadUserPoints();
         setupNumberSpinner();
@@ -115,9 +129,43 @@ public class RouletteActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarAvisoDeJuegoProlongado() {
+        long minutos = TimeUnit.MILLISECONDS.toMinutes(totalPlayTimeMillis);
+        String consejo = getAdviceForMinutes((int) minutos);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Too much time playing?")
+                .setMessage("You have been playing " + minutos + " minute(s). \n\nIn that time you could have " + consejo + ".")
+                .setPositiveButton("Get a rest", (dialogInterface, which) -> {
+                     Intent intent = new Intent(RouletteActivity.this, ContadorActivity.class);
+                     startActivity(intent);
+                     finish();
+                  })
+                .setNegativeButton("Keep playing", null)
+                .create();
+
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.blue_dark));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.blue_dark));
+    }
+    private String getAdviceForMinutes(int minutos) {
+        for (AdviceMessage advice : adviceList) {
+            if (advice.isApplicable(minutos)) {
+                return advice.getAdvice();
+            }
+        }
+        return "rested or done something healthy";
+    }
+
     // apuestas ingresadas, valida y luego inicia la animación de la ruleta.
     private void placeBetAndSpin() {
-        // Validación y extracción de apuestas (como ya lo tienes)
+        totalPlayTimeMillis += 60_000;
+
+        if (totalPlayTimeMillis % 120_000 == 0) {
+            mostrarAvisoDeJuegoProlongado();
+        }
+
+        // Validación y extracción de apuestas
         int betNumber = 0, betColor = 0, betParity = 0;
         int chosenNumber = (Integer) numberSpinner.getSelectedItem();
         int selectedColorId = colorRadioGroup.getCheckedRadioButtonId();
@@ -265,6 +313,19 @@ public class RouletteActivity extends AppCompatActivity {
             return "Green";
         }
         return reds.contains(number) ? "Red" : "Black";
+    }
+
+    private void cargarConsejosDesdeFirestore(){
+        db.collection("roulette_advice")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    adviceList.clear();
+                    queryDocumentSnapshots.getDocuments().forEach(document -> {
+                        AdviceMessage advice = document.toObject(AdviceMessage.class);
+                        adviceList.add(advice);
+                        });
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error loading advice messages", e));
     }
 
     private void setupBottomNavigation() {
