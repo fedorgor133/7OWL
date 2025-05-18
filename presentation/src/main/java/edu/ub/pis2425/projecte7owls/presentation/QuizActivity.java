@@ -1,6 +1,7 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -63,7 +64,23 @@ public class QuizActivity extends AppCompatActivity {
         loadQuestions();
         loadUserPoints();
         setupOptionListeners();
+
+        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
+        currentQuestionIndex = prefs.getInt("currentIndex", 0);
+        score = prefs.getInt("score", 0);
+
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("currentIndex", currentQuestionIndex);
+        editor.putInt("score", score);
+        editor.apply();
+    }
+
 
     private void setupBottomNavigation() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
