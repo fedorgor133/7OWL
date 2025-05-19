@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -52,6 +54,31 @@ public class ProfileActivity extends AppCompatActivity {
         emailTextView = findViewById(R.id.emailTextView);
         entryDateTextView = findViewById(R.id.entryDateTextView);
         profileImageView = findViewById(R.id.profileImageView);
+
+        binding.btnDeleteAccount.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(ProfileActivity.this)
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account? This action cannot be reversed.")
+                    .setPositiveButton("Yes, delete", (dialog, which) -> {
+                        if (mAuth.getCurrentUser() != null) {
+                            mAuth.getCurrentUser().delete()
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(ProfileActivity.this, "Account deleted successfully.", Toast.LENGTH_LONG).show();
+                                            Intent intent = new Intent(ProfileActivity.this, LogInActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Toast.makeText(ProfileActivity.this, "Error deleting account: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()) // Cerrar el diálogo si el usuario cancela
+                    .show();
+        });
+
 
         // Dentro de onCreate()
         binding.btnLogout.setOnClickListener(v -> {

@@ -132,10 +132,19 @@
                 android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Log Out"
+                android:text="LOG OUT"
                 android:textSize="18sp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@android:color/holo_red_light"/>
+            <Button
+                android:id="@+id/btnDeleteAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="DELETE ACCOUNT"
+                android:textSize="18sp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@android:color/holo_red_dark"/>
+
 
         </LinearLayout>
 
