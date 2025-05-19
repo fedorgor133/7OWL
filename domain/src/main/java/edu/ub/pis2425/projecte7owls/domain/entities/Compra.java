@@ -7,7 +7,6 @@ public class Compra {
     private String fechaCompra;
 
     public Compra() {
-        // Requerido por Firestore
     }
 
     public Compra(String nombre, int precio, String imagen, String fechaCompra) {
