@@ -128,7 +128,17 @@
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:layout_marginTop="12dp" />
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Log Out"
+                android:textSize="18sp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@android:color/holo_red_light"/>
+
         </LinearLayout>
+
     </ScrollView>
 
     <!-- Barra inferior -->

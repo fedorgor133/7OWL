@@ -53,6 +53,16 @@ public class ProfileActivity extends AppCompatActivity {
         entryDateTextView = findViewById(R.id.entryDateTextView);
         profileImageView = findViewById(R.id.profileImageView);
 
+        // Dentro de onCreate()
+        binding.btnLogout.setOnClickListener(v -> {
+            mAuth.signOut(); // Cerrar sesión en Firebase
+            Intent intent = new Intent(ProfileActivity.this, LogInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish(); // Finalizar ProfileActivity para que no quede en la pila de actividades
+        });
+
+
         binding.profileImageView.setOnClickListener(v -> {
             Intent intent = new Intent(this, ImagesActivity.class);
             startActivityForResult(intent, 1);
@@ -163,6 +173,16 @@ public class ProfileActivity extends AppCompatActivity {
             }).addOnFailureListener(e -> {
                 Log.e("Firestore", "Error loading userInfo", e);
             });
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(this, LogInActivity.class);
+            startActivity(intent);
+            finish();
         }
     }
 
