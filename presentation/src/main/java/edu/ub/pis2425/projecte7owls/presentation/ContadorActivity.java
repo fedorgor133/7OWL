@@ -91,6 +91,7 @@ public class ContadorActivity extends AppCompatActivity {
 
         loadAdviceMessages();
         comprovarUltimoRegistro();
+        actualizarUltimoRegistro();
     }
 
     @Override
@@ -209,6 +210,13 @@ public class ContadorActivity extends AppCompatActivity {
                     }
                 }
             }, 500); // Esperar 500ms antes de ejecutar la lógica
+        }
+    }
+    private void actualizarUltimoRegistro() {
+        if (auth.getCurrentUser() != null) {
+            String userId = auth.getCurrentUser().getUid();
+            db.collection("usuarios").document(userId).update("ultimoRegistro", FieldValue.serverTimestamp())
+                    .addOnFailureListener(e -> Log.e("Firestore", "Error updating ultimoRegistro", e));
         }
     }
     private String convertirTimeStampDia(Timestamp ts){

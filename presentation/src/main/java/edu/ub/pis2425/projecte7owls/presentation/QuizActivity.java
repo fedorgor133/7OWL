@@ -145,6 +145,11 @@ public class QuizActivity extends AppCompatActivity {
                     Toast.makeText(this, "Error loading questions: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
+    private void actualizarNumQuiz(){
+        db.collection("usuarios").document(uid)
+                .update("numQuiz",numQuiz+1)
+                .addOnFailureListener(e -> Log.e("Firestore", "Error incrementando numQuiz", e));
+    }
 
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
@@ -227,9 +232,7 @@ public class QuizActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc ->
                         Toast.makeText(this, "Quiz finished! Score: " + score + " points", Toast.LENGTH_LONG).show()
                 );
-        db.collection("usuarios").document(uid)
-                .update("numQuiz",numQuiz+1)
-                .addOnFailureListener(e -> Log.e("Firestore", "Error incrementando numQuiz", e));
+        actualizarNumQuiz();
 
         finish();
     }
@@ -247,6 +250,7 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void endQuizDueToInactivity() {
+        actualizarNumQuiz();
         Toast.makeText(this, "No activity detected. Quiz ended.", Toast.LENGTH_LONG).show();
         finish();
     }
