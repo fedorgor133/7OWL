@@ -2,6 +2,7 @@ package edu.ub.pis2425.projecte7owls.data.service.repositories.firestore;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -103,4 +104,27 @@ public class UserRepository implements IUserRepository {
                     Log.e("Firestore", "Error updating points", e);
                 });
     }
+
+
+    public LiveData<Map<String, Object>> getUserData(String uid) {
+        MutableLiveData<Map<String, Object>> dataLive = new MutableLiveData<>();
+        db.collection("usuarios").document(uid).get()
+                .addOnSuccessListener(doc -> dataLive.setValue(doc.getData()))
+                .addOnFailureListener(e -> dataLive.setValue(null));
+        return dataLive;
+    }
+
+
+    public LiveData<Integer> getUserPoints(String uid) {
+        MutableLiveData<Integer> pointsLive = new MutableLiveData<>();
+        db.collection("usuarios").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    Long points = doc.getLong("points");
+                    pointsLive.setValue(points != null ? points.intValue() : 0);
+                })
+                .addOnFailureListener(e -> pointsLive.setValue(0));
+        return pointsLive;
+    }
+
+
 }

@@ -11,7 +11,6 @@ import edu.ub.pis2425.projecte7owls.R;
 
 public class ShopActivity extends AppCompatActivity {
 
-    private int cartTotal = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

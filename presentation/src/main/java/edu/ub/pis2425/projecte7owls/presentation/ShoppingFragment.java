@@ -21,14 +21,18 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.domain.entities.Product;
 import edu.ub.pis2425.projecte7owls.presentation.adapters.ProductAdapter;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.ShoppingViewModel;
 import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
 public class ShoppingFragment extends Fragment implements ProductAdapter.OnProductClickListener {
@@ -45,8 +49,9 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
 
     private UserViewModel userViewModel;
     private String uid;
-    private FirebaseFirestore db;
+    private ShoppingViewModel shoppingViewModel;
     private int currentPoints = 0;
+
 
 
     @Nullable
@@ -60,6 +65,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         buttonCheckout = view.findViewById(R.id.buttonCheckout);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         pointsTextView = view.findViewById(R.id.pointsTextView);
+        shoppingViewModel = new ViewModelProvider(this).get(ShoppingViewModel.class);
         Button btnHistorial =view.findViewById(R.id.btnHistorial);
         btnHistorial.setOnClickListener(v -> {
             Log.d("ShoppingFragment", "Botón Historial clickeado");
@@ -76,9 +82,13 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         adapter = new ProductAdapter(productList, this);
         recyclerView.setAdapter(adapter);
 
-        db = FirebaseFirestore.getInstance();
+        shoppingViewModel.getProducts().observe(getViewLifecycleOwner(), products -> {
+            productList.clear();
+            productList.addAll(products);
+            adapter.notifyDataSetChanged();
+        });
 
-        loadProductsFromFirestore();
+
 
         // Observa los puntos del usuario
         userViewModel.observeUserScore(uid).observe(getViewLifecycleOwner(), score -> {
@@ -100,25 +110,6 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
         return view;
     }
 
-    private void loadProductsFromFirestore() {
-        CollectionReference productsRef = db.collection("productos");
-
-        productsRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                productList.clear();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    Product product = document.toObject(Product.class);
-                    productList.add(product);
-                    Log.d(TAG, "Producto cargado: " + product.getName());
-                }
-                adapter.notifyDataSetChanged();
-                Log.d(TAG, "Productos totales: " + productList.size());
-            } else {
-                Log.e(TAG, "Error al cargar productos: ", task.getException());
-            }
-        });
-    }
-
     @Override
     public void onProductClick(Product product, int quantity) {
         totalPrice += product.getPrice();
@@ -131,41 +122,25 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
             int updatedPoints = currentPoints - cost;
             userViewModel.updateUserScore(uid, updatedPoints);
 
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            long timestamp = System.currentTimeMillis();
-            String fechaCompra = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(new java.util.Date(timestamp));
-
+            String fechaCompra = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
             Map<Product, Integer> selectedProducts = adapter.getSelectedProducts();
 
-            for (Map.Entry<Product, Integer> entry : selectedProducts.entrySet()) {
-                Product product = entry.getKey();
-                int quantity = entry.getValue();
-
-                for (int i = 0; i < quantity; i++) {
-                    HashMap<String, Object> compra = new HashMap<>();
-                    compra.put("nombre", product.getName());
-                    compra.put("precio", product.getPrice());
-                    compra.put("imagen", product.getImageUrl());
-                    compra.put("fechaCompra", fechaCompra);
-
-                    db.collection("usuarios")
-                            .document(uid)
-                            .collection("historial_compras")
-                            .add(compra)
-                            .addOnSuccessListener(ref -> Log.d(TAG, "Producto comprado: " + product.getName()))
-                            .addOnFailureListener(e -> Log.e(TAG, "Error al guardar compra", e));
+            shoppingViewModel.registerPurchase(uid, selectedProducts, fechaCompra, task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getContext(), "Compra realizada con éxito", Toast.LENGTH_SHORT).show();
+                    adapter.clearSelection();
+                    totalPrice = 0;
+                    textViewTotal.setText("Total: 0 points");
+                } else {
+                    Toast.makeText(getContext(), "Error en la compra", Toast.LENGTH_SHORT).show();
                 }
-            }
-
-            Toast.makeText(getContext(), "Compra realizada con éxito", Toast.LENGTH_SHORT).show();
-            adapter.clearSelection();
-            totalPrice = 0;
-            textViewTotal.setText("Total: 0 points");
+            });
 
         } else {
             Toast.makeText(getContext(), "No tienes puntos suficientes", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
 

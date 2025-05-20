@@ -176,31 +176,32 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
     private void loadUserInfo(){
-        if (mAuth.getCurrentUser() != null) {
-            db.collection("usuarios").document(uid).get().addOnSuccessListener(document -> {
-                if (document.exists()) {
-                    if (document.contains("email")) {
-                        emailTextView.setText(document.getString("email"));
-                    }
-                    if (document.contains("fechaRegistro")) {
-                        Timestamp timestamp = document.getTimestamp("fechaRegistro"); // Obtiene el Timestamp
-                        if (timestamp != null) {
-                            Date date = timestamp.toDate(); // Convierte a Date
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()); // Formato de fecha
-                            entryDateTextView.setText(sdf.format(date)); // Muestra la fecha formateada
-                        }
-                    }
-                    if(document.contains("imagenPerfil")){
-                        int imageId = document.getLong("imagenPerfil").intValue();
-                        if(imageId != 0){
-                            binding.profileImageView.setImageResource(imageId);
-                        }
+        userViewModel.getUserData(uid).observe(this, data -> {
+            if (data != null) {
+                if (data.containsKey("email")) {
+                    emailTextView.setText((String) data.get("email"));
+                }
+
+                if (data.containsKey("fechaRegistro")) {
+                    Timestamp timestamp = (Timestamp) data.get("fechaRegistro");
+                    if (timestamp != null) {
+                        Date date = timestamp.toDate();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        entryDateTextView.setText(sdf.format(date));
                     }
                 }
-            }).addOnFailureListener(e -> {
-                Log.e("Firestore", "Error loading userInfo", e);
-            });
-        }
+
+                if (data.containsKey("imagenPerfil")) {
+                    int imageId = ((Long) data.get("imagenPerfil")).intValue();
+                    if (imageId != 0) {
+                        binding.profileImageView.setImageResource(imageId);
+                    }
+                }
+            } else {
+                Toast.makeText(this, "Error loading user data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     @Override

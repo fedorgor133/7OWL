@@ -1,6 +1,5 @@
 package edu.ub.pis2425.projecte7owls.presentation;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,12 +7,12 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.List;
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.domain.entities.Compra;
 import edu.ub.pis2425.projecte7owls.presentation.adapters.PurchaseHistoryAdapter;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.ShoppingViewModel;
 
 public class HistorialDialogFragment extends DialogFragment {
 
@@ -29,6 +29,8 @@ public class HistorialDialogFragment extends DialogFragment {
     private List<Compra> historial;
     private FirebaseFirestore db;
     private String uid;
+
+    private ShoppingViewModel shoppingViewModel;
 
     public HistorialDialogFragment() {
 
@@ -44,32 +46,19 @@ public class HistorialDialogFragment extends DialogFragment {
         historial = new ArrayList<>();
         adapter = new PurchaseHistoryAdapter(historial);
         recyclerView.setAdapter(adapter);
-
-        db = FirebaseFirestore.getInstance();
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        cargarHistorial();
         Button buttonCerrar = view.findViewById(R.id.buttonCerrar);
         buttonCerrar.setOnClickListener(v -> dismiss());
+        shoppingViewModel = new ViewModelProvider(requireActivity()).get(ShoppingViewModel.class);
+        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        shoppingViewModel.getPurchaseHistory(uid).observe(getViewLifecycleOwner(), compras -> {
+            historial.clear();
+            historial.addAll(compras);
+            adapter.notifyDataSetChanged();
+        });
 
 
         return view;
-    }
-
-    private void cargarHistorial() {
-        db.collection("usuarios")
-                .document(uid)
-                .collection("historial_compras")
-                .get()
-                .addOnSuccessListener(query -> {
-                    historial.clear();
-                    for (QueryDocumentSnapshot doc : query) {
-                        Compra compra = doc.toObject(Compra.class);
-                        historial.add(compra);
-                    }
-                    adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> Log.e("HistorialDialog", "Error cargando historial", e));
     }
 
     @Override

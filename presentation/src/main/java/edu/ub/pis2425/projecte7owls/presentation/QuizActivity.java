@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,22 +14,23 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import edu.ub.pis2425.projecte7owls.R;
 import edu.ub.pis2425.projecte7owls.databinding.ActivityQuizBinding;
+import edu.ub.pis2425.projecte7owls.presentation.QuizDialogFragment;
+import edu.ub.pis2425.projecte7owls.presentation.viewmodel.QuizViewModel;
 import edu.ub.pis2425.projecte7owls.presentation.viewmodel.UserViewModel;
 
-public class QuizActivity extends AppCompatActivity {
+public class QuizActivity extends AppCompatActivity implements QuizDialogFragment.QuizActivityCallback {
+
     private ActivityQuizBinding binding;
-    private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private QuizViewModel quizViewModel;
+    private UserViewModel userViewModel;
     private List<DocumentSnapshot> questions = new ArrayList<>();
     private TextView pointsTextViewQuiz;
     private int currentQuestionIndex = 0;
@@ -39,9 +39,8 @@ public class QuizActivity extends AppCompatActivity {
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
     private String uid;
-    private UserViewModel userViewModel;
-
     private int currentPoints;
+    private boolean quizRestarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,109 +48,52 @@ public class QuizActivity extends AppCompatActivity {
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        quizViewModel = new ViewModelProvider(this).get(QuizViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         pointsTextViewQuiz = findViewById(R.id.pointsTextViewQuiz);
 
-        db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        uid = mAuth.getCurrentUser().getUid();
 
         inactivityHandler = new Handler();
         inactivityRunnable = this::endQuizDueToInactivity;
 
-        uid = mAuth.getCurrentUser().getUid();
-        observeUserScore();
         setupBottomNavigation();
-        loadQuestions();
-        loadUserPoints();
         setupOptionListeners();
+        observeUserScore();
+        observeQuizData();
 
-        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
-        currentQuestionIndex = prefs.getInt("currentIndex", 0);
-        score = prefs.getInt("score", 0);
-
+        restoreState();
+        quizViewModel.loadQuestions(uid, totalQuestions);
+        quizViewModel.loadUserPoints(uid);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("currentIndex", currentQuestionIndex);
-        editor.putInt("score", score);
-        editor.apply();
-    }
+    private void observeQuizData() {
+        quizViewModel.getQuestions().observe(this, loadedQuestions -> {
+            questions = loadedQuestions;
 
-
-    private void setupBottomNavigation() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_quiz);
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-
-            if (id == R.id.nav_contador) {
-                Intent intent = new Intent(this, ContadorActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                return true;
-            } else if (id == R.id.nav_quiz) {
-                return true;
-            } else if (id == R.id.nav_shop) {
-                Intent intent = new Intent(this, ShopActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                return true;
-            } else if (id == R.id.nav_ruleta) {
-                Intent intent = new Intent(this, RouletteActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                return true;
-            } else if (id == R.id.nav_profile) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                return true;
+            if ((questions == null || questions.size() < totalQuestions) && !quizRestarted) {
+                quizRestarted = true;
+                quizViewModel.resetUserQuestions(uid);
+                new Handler().postDelayed(() -> {
+                    resetQuizState();
+                    quizViewModel.loadQuestions(uid, totalQuestions);
+                    Toast.makeText(this, "Reiniciando preguntas...", Toast.LENGTH_SHORT).show();
+                }, 1000);
+                return;
             }
-            return false;
+
+            showQuestion();
         });
-    }
 
-    private void loadUserPoints() {
-        if (mAuth.getCurrentUser() != null) {
-            db.collection("usuarios").document(uid).get().addOnSuccessListener(document -> {
-                if (document.exists() && document.contains("points")) {
-                    Long pointsValue = document.getLong("points");
-                    currentPoints = pointsValue != null ? pointsValue.intValue() : 0;
-                } else {
-                    currentPoints = 0;
-                }
-                pointsTextViewQuiz.setText("Points: " + currentPoints);
-            }).addOnFailureListener(e -> {
-                Log.e("Firestore", "Error loading points", e);
-            });
-        }
-    }
+        quizViewModel.getUserPoints().observe(this, points -> {
+            currentPoints = points;
+            pointsTextViewQuiz.setText("Points: " + points);
+        });
 
-    private void loadQuestions() {
-        uid = mAuth.getCurrentUser().getUid();
-
-        db.collection("preguntas_usuari")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("contestadaCorrecta", false)
-                .limit(totalQuestions)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    questions = querySnapshot.getDocuments();
-                    if (questions.isEmpty()) {
-                        Toast.makeText(this, "No questions available. Come back later!", Toast.LENGTH_LONG).show();
-                        finish();
-                    } else {
-                        showQuestion();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading questions: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        quizViewModel.getErrors().observe(this, error ->
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+        );
     }
 
     private void showQuestion() {
@@ -196,9 +138,6 @@ public class QuizActivity extends AppCompatActivity {
             String correctAnswer = currentDoc.getString("respuestaCorrecta");
 
             boolean isCorrect = selectedAnswer.equals(correctAnswer);
-            Map<String, Object> updateData = new HashMap<>();
-            updateData.put("contestadaCorrecta", isCorrect);
-
             if (isCorrect) {
                 score += 10;
                 userViewModel.updateUserScore(uid, currentPoints + score);
@@ -208,47 +147,36 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(this, "Incorrect", Toast.LENGTH_SHORT).show();
             }
 
-            db.collection("preguntas_usuari")
-                    .document(currentDoc.getId())
-                    .update(updateData)
-                    .addOnSuccessListener(aVoid -> {
-                        // Puedes hacer un log o mensaje si quieres
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Error al actualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-
+            quizViewModel.updateQuestionResult(currentDoc.getId(), isCorrect);
             currentQuestionIndex++;
             showQuestion();
         });
     }
 
     private void showFinalScore() {
+        quizViewModel.saveQuizResult(uid, score);
+        clearSavedState();
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("userId", uid);
-        result.put("score", score);
-        result.put("timestamp", new java.util.Date());
+        QuizDialogFragment.newInstance(score)
+                .show(getSupportFragmentManager(), "score_dialog");
+    }
 
-        db.collection("results")
-                .add(result)
-                .addOnSuccessListener(doc ->
-                        Toast.makeText(this, "Quiz finished! Score: " + score + " owls", Toast.LENGTH_LONG).show()
-                );
-
-        finish();
+    @Override
+    public void onRetryQuiz() {
+        quizViewModel.resetUserQuestions(uid);
+        resetQuizState();
+        quizViewModel.loadQuestions(uid, totalQuestions);
     }
 
     private void observeUserScore() {
-        userViewModel.observeUserScore(uid).observe(this, score -> {
-            pointsTextViewQuiz.setText("Points: " + score + " owls");
-        });
+        userViewModel.observeUserScore(uid).observe(this, score ->
+                pointsTextViewQuiz.setText("Points: " + score + " owls")
+        );
     }
-
 
     private void resetInactivityTimer() {
         inactivityHandler.removeCallbacks(inactivityRunnable);
-        inactivityHandler.postDelayed(inactivityRunnable, 60000); // 60s
+        inactivityHandler.postDelayed(inactivityRunnable, 60000);
     }
 
     private void endQuizDueToInactivity() {
@@ -256,9 +184,61 @@ public class QuizActivity extends AppCompatActivity {
         finish();
     }
 
+    private void restoreState() {
+        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
+        currentQuestionIndex = prefs.getInt("currentIndex", 0);
+        score = prefs.getInt("score", 0);
+    }
+
+    private void clearSavedState() {
+        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+    }
+
+    private void resetQuizState() {
+        clearSavedState();
+        currentQuestionIndex = 0;
+        score = 0;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = getSharedPreferences("quiz_state", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("currentIndex", currentQuestionIndex);
+        editor.putInt("score", score);
+        editor.apply();
+    }
+
     @Override
     protected void onDestroy() {
         inactivityHandler.removeCallbacks(inactivityRunnable);
         super.onDestroy();
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_quiz);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_contador) {
+                startActivity(new Intent(this, ContadorActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                return true;
+            } else if (id == R.id.nav_quiz) {
+                return true;
+            } else if (id == R.id.nav_shop) {
+                startActivity(new Intent(this, ShopActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                return true;
+            } else if (id == R.id.nav_ruleta) {
+                startActivity(new Intent(this, RouletteActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                return true;
+            }
+            return false;
+        });
     }
 }

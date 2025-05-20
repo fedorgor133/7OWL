@@ -35,5 +35,9 @@ public class UserViewModel extends ViewModel {
         return userRepository.getScoreHistory(userId);
     }
 
+    public LiveData<Map<String, Object>> getUserData(String userId) {
+        return userRepository.getUserData(userId);
+    }
+
 
 }
