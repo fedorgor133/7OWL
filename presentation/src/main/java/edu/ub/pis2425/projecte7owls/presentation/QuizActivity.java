@@ -78,7 +78,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
 
             if ((questions == null || questions.size() < totalQuestions) && !quizRestarted) {
                 quizRestarted = true;
-                quizViewModel.resetUserQuestions(uid);
+                //quizViewModel.resetUserQuestions(uid);
                 new Handler().postDelayed(() -> {
                     resetQuizState();
                     quizViewModel.loadQuestions(uid, totalQuestions);
@@ -170,16 +170,15 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
     private void showFinalScore() {
         quizViewModel.saveQuizResult(uid, score);
         clearSavedState();
-
+        quizViewModel.increaseNumQuiz(uid,numQuiz);
+        numQuiz++;
         QuizDialogFragment.newInstance(score)
                 .show(getSupportFragmentManager(), "score_dialog");
-
-        quizViewModel.increaseNumQuiz(uid,numQuiz);
     }
 
     @Override
     public void onRetryQuiz() {
-        quizViewModel.resetUserQuestions(uid);
+        //quizViewModel.resetUserQuestions(uid);
         resetQuizState();
         quizViewModel.loadQuestions(uid, totalQuestions);
     }
