@@ -112,9 +112,20 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
 
     @Override
     public void onProductClick(Product product, int quantity) {
-        totalPrice += product.getPrice();
+        int previousQuantity = adapter.getSelectedProducts().getOrDefault(product, 0);
+        int pricePerUnit = product.getPrice();
+
+        int totalOld = totalPrice;
+        totalPrice = 0;
+
+        // recalculamos el total
+        for (Map.Entry<Product, Integer> entry : adapter.getSelectedProducts().entrySet()) {
+            totalPrice += entry.getKey().getPrice() * entry.getValue();
+        }
+
         textViewTotal.setText(String.format("Total: %d points", totalPrice));
     }
+
 
 
     private void handlePurchase(int cost) {

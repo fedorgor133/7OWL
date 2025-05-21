@@ -52,12 +52,37 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Botón de añadir al carrito -->
-        <Button
-            android:id="@+id/buttonAddToCart"
+        <!-- Controles de cantidad -->
+        <LinearLayout
+            android:id="@+id/quantityControls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/buttonDecrease"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="−"
+                android:enabled="false" />
+
+            <TextView
+                android:id="@+id/textQuantity"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="0"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="8dp" />
+
+            <Button
+                android:id="@+id/buttonIncrease"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="+" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
