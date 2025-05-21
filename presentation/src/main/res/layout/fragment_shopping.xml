@@ -28,7 +28,7 @@
             android:id="@+id/btnHistorial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Historial"
+            android:text="History"
             android:textColor="@color/blue_dark"
             android:backgroundTint="@color/white"/>
     </LinearLayout>

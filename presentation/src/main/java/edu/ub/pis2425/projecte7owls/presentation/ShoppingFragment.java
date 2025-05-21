@@ -99,7 +99,7 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
 
         buttonCheckout.setOnClickListener(v -> {
             if (getContext() != null) {
-                android.widget.Toast.makeText(getContext(), "Comprando productos: " + totalPrice + " points", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(getContext(), "Buying products: " + totalPrice + " points", android.widget.Toast.LENGTH_SHORT).show();
                 handlePurchase(totalPrice);
                 totalPrice = 0;
                 textViewTotal.setText("Total: 0 owls");
@@ -138,17 +138,17 @@ public class ShoppingFragment extends Fragment implements ProductAdapter.OnProdu
 
             shoppingViewModel.registerPurchase(uid, selectedProducts, fechaCompra, task -> {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getContext(), "Compra realizada con éxito", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Purchase done successfully", Toast.LENGTH_SHORT).show();
                     adapter.clearSelection();
                     totalPrice = 0;
                     textViewTotal.setText("Total: 0 points");
                 } else {
-                    Toast.makeText(getContext(), "Error en la compra", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error in the purchase", Toast.LENGTH_SHORT).show();
                 }
             });
 
         } else {
-            Toast.makeText(getContext(), "No tienes puntos suficientes", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "You don't have enough points", Toast.LENGTH_SHORT).show();
         }
     }
 

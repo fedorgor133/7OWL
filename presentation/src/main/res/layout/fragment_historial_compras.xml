@@ -10,7 +10,7 @@
         android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Historial de Compras"
+        android:text="Shopping history"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -26,8 +26,9 @@
         android:id="@+id/buttonCerrar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cerrar"
+        android:text="Close"
         android:layout_gravity="end"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/blue_dark"/>
 
 </LinearLayout>
