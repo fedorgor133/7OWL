@@ -180,6 +180,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
     public void onRetryQuiz() {
         //quizViewModel.resetUserQuestions(uid);
         resetQuizState();
+        comprovarNumQuiz();
         quizViewModel.loadQuestions(uid, totalQuestions);
     }
 
