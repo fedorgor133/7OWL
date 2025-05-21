@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -16,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -30,15 +32,13 @@ public class ContadorActivity extends AppCompatActivity {
     private TextView adviceTextView;
     private TextView userInfotextView;
     private Button resetButton;
-
     private FirebaseAuth auth;
     private ContadorViewModel contadorViewModel;
-
     private Timestamp fechaReset;
     private Timestamp fechaRegistro;
     private long resetCount = 0;
     private List<AdviceMessageContador> adviceList;
-
+    private Timestamp ultimoRegistro;
     private final Handler handler = new Handler();
     private final Runnable updateRunnable = new Runnable() {
         @Override
@@ -74,11 +74,14 @@ public class ContadorActivity extends AppCompatActivity {
         setupBottomNavigation();
 
         resetButton.setOnClickListener(v -> mostrarConfirmacionReset());
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // Arranca la actualización periódica
         handler.post(updateRunnable);
 
         String uid = auth.getCurrentUser().getUid();
@@ -86,6 +89,13 @@ public class ContadorActivity extends AppCompatActivity {
         contadorViewModel.getFechaRegistro(uid).observe(this, ts -> {
             if (ts != null) fechaRegistro = ts;
             updateUserInfo();
+        });
+
+        contadorViewModel.getUltimoRegistro(uid).observe(this, ts -> {
+            if (ts != null) ultimoRegistro = ts;
+            updateUserInfo();
+            comprovarUltimoRegistro(uid);
+            contadorViewModel.updateUltimoRegistro(uid);
         });
 
         contadorViewModel.getFechaReset(uid).observe(this, ts -> {
@@ -100,11 +110,13 @@ public class ContadorActivity extends AppCompatActivity {
         contadorViewModel.getAdviceMessages().observe(this, advices -> {
             if (advices != null) adviceList = advices;
         });
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Detener actualizaciones al salir
         handler.removeCallbacks(updateRunnable);
     }
 
@@ -166,12 +178,14 @@ public class ContadorActivity extends AppCompatActivity {
         userInfotextView.setText(mensaje);
     }
 
+    // Simulación: Cada 10 segundos reales equivalen a 1 día simulado.
     private long calcularDias(Timestamp inicio, Timestamp fin) {
         long diffMillis = fin.toDate().getTime() - inicio.toDate().getTime();
         long segundos = TimeUnit.MILLISECONDS.toSeconds(diffMillis);
         return segundos / 10; // 10 segundos reales = 1 día simulado
     }
 
+    // Devuelve el mensaje adecuado según los días simulados.
     private String getAdviceForDays(long days) {
         if (adviceList == null) return null;
         for (AdviceMessageContador advice : adviceList) {
@@ -180,6 +194,26 @@ public class ContadorActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+    // Comprueba si la fecha del ultimo registro es de un dia diferente al actual para restringir el numero de Quiz al dia
+    private void comprovarUltimoRegistro(String uid) {
+        String ultimoRegistroS = convertirTimeStampDia(ultimoRegistro);
+        String fechaActual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+        if (!fechaActual.equals(ultimoRegistroS)) {
+            contadorViewModel.resetNumQuiz(uid);
+        }
+    }
+
+    private String convertirTimeStampDia(Timestamp ts){
+        String fechaTsString=null;
+        if(ts != null){
+            Date fecha = ts.toDate();
+            // Definir el formato dd/MM/yyyy
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            // Convertir la fecha a String
+            fechaTsString = dateFormat.format(fecha);
+        }
+        return fechaTsString;
     }
 
     private void setupBottomNavigation() {

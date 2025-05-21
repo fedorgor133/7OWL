@@ -1,5 +1,6 @@
 package edu.ub.pis2425.projecte7owls.data.service.repositories.firestore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -47,6 +48,17 @@ public class QuizRepository implements IQuizRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+    public LiveData<Integer> getNumQuiz(String uid) {
+        MutableLiveData<Integer> liveData = new MutableLiveData<>();
+        db.collection("usuarios").document(uid).get()
+                .addOnSuccessListener(document -> {
+                    Long numQuizL = document.getLong("numQuiz");
+                    int numQuiz = numQuizL.intValue();
+                    liveData.setValue(numQuiz);
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener numQuiz del usuario", e));
+        return liveData;
+    }
 
     public LiveData<Map<String, Object>> getUserData(String uid) {
         MutableLiveData<Map<String, Object>> dataLive = new MutableLiveData<>();
@@ -74,6 +86,12 @@ public class QuizRepository implements IQuizRepository {
                 .addOnFailureListener(e ->
                         Log.e("QuizRepository", "Error loading questions for reset", e)
                 );
+    }
+    public void increaseNumQuiz(String uid,long numQuiz){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("usuarios").document(uid)
+                .update("numQuiz",numQuiz+1)
+                .addOnFailureListener(e -> Log.e("Firestore", "Error incrementando numQuiz", e));
     }
 
 }

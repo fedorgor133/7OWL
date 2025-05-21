@@ -31,6 +31,14 @@ public class ContadorRepository implements IContadorRepository {
         return liveData;
     }
 
+    public LiveData<Timestamp> getUltimoRegistro(String uid) {
+        MutableLiveData<Timestamp> liveData = new MutableLiveData<>();
+        db.collection("usuarios").document(uid).get()
+                .addOnSuccessListener(doc -> liveData.setValue(doc.getTimestamp("ultimoRegistro")))
+                .addOnFailureListener(e -> liveData.setValue(null));
+        return liveData;
+    }
+
     @Override
     public LiveData<Timestamp> getFechaReset(String uid) {
         MutableLiveData<Timestamp> liveData = new MutableLiveData<>();
@@ -66,6 +74,7 @@ public class ContadorRepository implements IContadorRepository {
         return adviceLive;
     }
 
+
     @Override
     public void resetContador(String uid, OnCompleteListener<Void> onComplete) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -85,6 +94,19 @@ public class ContadorRepository implements IContadorRepository {
         });
     }
 
+    @Override
+    public void updateUltimoRegistro(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("usuarios").document(uid);
+        userRef.update("ultimoRegistro", FieldValue.serverTimestamp())
+                .addOnFailureListener(e -> Log.e("Firestore", "Error updating ultimoRegistro", e));
+    }
+    public void resetNumQuiz(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("usuarios").document(uid);
+        userRef.update("numQuiz", 0)
+                .addOnFailureListener(e -> Log.e("Firestore", "Error reseteando numQuiz", e));
+    }
 
 
 }

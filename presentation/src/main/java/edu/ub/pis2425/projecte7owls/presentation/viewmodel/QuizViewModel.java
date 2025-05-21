@@ -31,6 +31,11 @@ public class QuizViewModel extends ViewModel {
         return pointsLiveData;
     }
 
+    public LiveData<Integer> getNumQuiz(String uid) {
+        return quizRepository.getNumQuiz(uid);
+    }
+
+
     public LiveData<String> getErrors() {
         return errorLiveData;
     }
@@ -73,6 +78,9 @@ public class QuizViewModel extends ViewModel {
 
     public void resetUserQuestions(String uid) {
         quizRepository.resetAllUserQuestions(uid);
+    }
+    public void increaseNumQuiz(String uid, long numQuiz){
+        quizRepository.increaseNumQuiz(uid,numQuiz);
     }
 
 }

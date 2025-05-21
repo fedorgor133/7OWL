@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -35,6 +37,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
     private TextView pointsTextViewQuiz;
     private int currentQuestionIndex = 0;
     private int score = 0;
+    private int numQuiz=0;
     private final int totalQuestions = 10;
     private Handler inactivityHandler;
     private Runnable inactivityRunnable;
@@ -57,6 +60,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
 
         inactivityHandler = new Handler();
         inactivityRunnable = this::endQuizDueToInactivity;
+
 
         setupBottomNavigation();
         setupOptionListeners();
@@ -94,8 +98,18 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
         quizViewModel.getErrors().observe(this, error ->
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show()
         );
-    }
 
+        quizViewModel.getNumQuiz(uid).observe(this, num -> {
+            numQuiz = num;
+            comprovarNumQuiz();
+        });
+    }
+    private void comprovarNumQuiz(){
+        if (numQuiz >= 3) {
+            Toast.makeText(this, "You have already done 3 quizzes today", Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
     private void showQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             showFinalScore();
@@ -159,6 +173,8 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
 
         QuizDialogFragment.newInstance(score)
                 .show(getSupportFragmentManager(), "score_dialog");
+
+        quizViewModel.increaseNumQuiz(uid,numQuiz);
     }
 
     @Override
@@ -180,6 +196,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
     }
 
     private void endQuizDueToInactivity() {
+        quizViewModel.increaseNumQuiz(uid,numQuiz);
         Toast.makeText(this, "No activity detected. Quiz ended.", Toast.LENGTH_LONG).show();
         finish();
     }

@@ -19,7 +19,9 @@ public class ContadorViewModel extends ViewModel {
     public LiveData<Timestamp> getFechaRegistro(String uid) {
         return repository.getFechaRegistro(uid);
     }
-
+    public LiveData<Timestamp> getUltimoRegistro(String uid) {
+        return repository.getUltimoRegistro(uid);
+    }
     public LiveData<Timestamp> getFechaReset(String uid) {
         return repository.getFechaReset(uid);
     }
@@ -34,6 +36,12 @@ public class ContadorViewModel extends ViewModel {
 
     public void resetContador(String uid, OnCompleteListener<Void> callback) {
         repository.resetContador(uid, callback);
+    }
+    public void updateUltimoRegistro(String uid) {
+        repository.updateUltimoRegistro(uid);
+    }
+    public void resetNumQuiz(String uid) {
+        repository.resetNumQuiz(uid);
     }
 
 

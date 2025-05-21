@@ -11,10 +11,13 @@ import edu.ub.pis2425.projecte7owls.domain.entities.AdviceMessageContador;
 
 public interface IContadorRepository {
     LiveData<Timestamp> getFechaRegistro(String uid);
+    LiveData<Timestamp> getUltimoRegistro(String uid);
     LiveData<Timestamp> getFechaReset(String uid);
     LiveData<Long> getResetCount(String uid);
     LiveData<List<AdviceMessageContador>> getAdviceMessages();
     void resetContador(String uid, OnCompleteListener<Void> onComplete);
+    void updateUltimoRegistro(String uid);
+    void resetNumQuiz(String uid);
 
 
 }
