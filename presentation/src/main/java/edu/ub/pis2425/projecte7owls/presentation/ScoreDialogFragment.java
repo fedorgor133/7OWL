@@ -71,7 +71,7 @@ public class ScoreDialogFragment extends DialogFragment {
                     historyText.append(sdf.format(date))
                             .append(": ")
                             .append(formattedChange)
-                            .append(" puntos\n");
+                            .append(" points\n");
                 }
             }
 
