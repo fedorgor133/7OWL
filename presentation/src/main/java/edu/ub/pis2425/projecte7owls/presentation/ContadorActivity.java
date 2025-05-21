@@ -78,46 +78,79 @@ public class ContadorActivity extends AppCompatActivity {
 
     }
 
+    private boolean updateRunnableStarted = false;
+
     @Override
     protected void onResume() {
         super.onResume();
-        // Arranca la actualización periódica
-        handler.post(updateRunnable);
 
         String uid = auth.getCurrentUser().getUid();
 
-        contadorViewModel.getFechaRegistro(uid).observe(this, ts -> {
-            if (ts != null) fechaRegistro = ts;
-            updateUserInfo();
+        // 1) Cargar fechaRegistro
+        contadorViewModel.getFechaRegistro(uid).observe(this, tsRegistro -> {
+            if (tsRegistro != null) {
+                fechaRegistro = tsRegistro;
+                Log.d("Contador", "fechaRegistro cargada: " + fechaRegistro.toDate());
+
+                // 2) Cargar fechaReset
+                contadorViewModel.getFechaReset(uid).observe(this, tsReset -> {
+                    if (tsReset != null) {
+                        fechaReset = tsReset;
+                        Log.d("Contador", "fechaReset cargada: " + fechaReset.toDate());
+                    } else {
+                        // Si nunca hubo reset, inicializar a fechaRegistro
+                        fechaReset = fechaRegistro;
+                        contadorViewModel.setFechaReset(uid, fechaRegistro);
+                        Log.d("Contador", "Inicializado fechaReset a fechaRegistro");
+                    }
+
+                    // 3) Solo iniciar updateRunnable una vez
+                    if (!updateRunnableStarted) {
+                        handler.post(updateRunnable);
+                        updateRunnableStarted = true;
+                        Log.d("Contador", "Iniciado updateRunnable");
+                    }
+                });
+
+                // Actualizar datos de usuario
+                updateUserInfo();
+            } else {
+                Log.w("Contador", "fechaRegistro aún es null");
+            }
         });
 
-        contadorViewModel.getUltimoRegistro(uid).observe(this, ts -> {
-            if (ts != null) ultimoRegistro = ts;
-            updateUserInfo();
-            comprovarUltimoRegistro(uid);
-            contadorViewModel.updateUltimoRegistro(uid);
-        });
-
-        contadorViewModel.getFechaReset(uid).observe(this, ts -> {
-            if (ts != null) fechaReset = ts;
-        });
-
+        // Otros observers únicos
         contadorViewModel.getResetCount(uid).observe(this, count -> {
-            if (count != null) resetCount = count;
-            updateUserInfo();
+            if (count != null) {
+                resetCount = count;
+                updateUserInfo();
+                Log.d("Contador", "resetCount: " + resetCount);
+            }
         });
 
         contadorViewModel.getAdviceMessages().observe(this, advices -> {
-            if (advices != null) adviceList = advices;
+            adviceList = advices;
+            Log.d("Contador", "adviceList cargada, total: " + (advices != null ? advices.size() : 0));
         });
 
+        contadorViewModel.getUltimoRegistro(uid).observe(this, tsUlt -> {
+            if (tsUlt != null) {
+                ultimoRegistro = tsUlt;
+                updateUserInfo();
+                comprovarUltimoRegistro(uid);
+                contadorViewModel.updateUltimoRegistro(uid);
+                Log.d("Contador", "ultimoRegistro: " + ultimoRegistro.toDate());
+            }
+        });
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Detener actualizaciones al salir
         handler.removeCallbacks(updateRunnable);
+        updateRunnableStarted = false; // Permitirá reiniciar si vuelve a Resume
+        Log.d("Contador", "Handler detenido");
     }
 
     private void mostrarConfirmacionReset() {

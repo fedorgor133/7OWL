@@ -1,10 +1,13 @@
 package edu.ub.pis2425.projecte7owls.presentation.viewmodel;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -43,6 +46,16 @@ public class ContadorViewModel extends ViewModel {
     public void resetNumQuiz(String uid) {
         repository.resetNumQuiz(uid);
     }
+
+    public void setFechaReset(String uid, Timestamp fecha) {
+        FirebaseFirestore.getInstance()
+                .collection("usuarios")
+                .document(uid)
+                .update("fechaReset", fecha)
+                .addOnSuccessListener(aVoid -> Log.d("ViewModel", "FechaReset creada con éxito"))
+                .addOnFailureListener(e -> Log.e("ViewModel", "Error al crear fechaReset", e));
+    }
+
 
 
 }
