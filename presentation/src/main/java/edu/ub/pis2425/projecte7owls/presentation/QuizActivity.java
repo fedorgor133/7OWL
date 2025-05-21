@@ -82,7 +82,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
                 new Handler().postDelayed(() -> {
                     resetQuizState();
                     quizViewModel.loadQuestions(uid, totalQuestions);
-                    Toast.makeText(this, "Reiniciando preguntas...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Restarting questions...", Toast.LENGTH_SHORT).show();
                 }, 1000);
                 return;
             }
@@ -92,7 +92,7 @@ public class QuizActivity extends AppCompatActivity implements QuizDialogFragmen
 
         quizViewModel.getUserPoints().observe(this, points -> {
             currentPoints = points;
-            pointsTextViewQuiz.setText("Points: " + points);
+            pointsTextViewQuiz.setText("Points: " + points + " owls");
         });
 
         quizViewModel.getErrors().observe(this, error ->
